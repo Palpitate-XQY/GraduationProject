@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.system.mapper.SysStorageConfigMapper">
+
+    <resultMap id="SysStorageConfigMap" type="xxqqyyy.community.modules.system.entity.SysStorageConfig">
+        <id property="id" column="id"/>
+        <result property="storageType" column="storage_type"/>
+        <result property="localBasePath" column="local_base_path"/>
+        <result property="localAccessBaseUrl" column="local_access_base_url"/>
+        <result property="qiniuAccessKey" column="qiniu_access_key"/>
+        <result property="qiniuSecretKey" column="qiniu_secret_key"/>
+        <result property="qiniuBucket" column="qiniu_bucket"/>
+        <result property="qiniuRegion" column="qiniu_region"/>
+        <result property="qiniuDomain" column="qiniu_domain"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, storage_type, local_base_path, local_access_base_url, qiniu_access_key, qiniu_secret_key,
+        qiniu_bucket, qiniu_region, qiniu_domain, remark, create_by, create_time, update_by, update_time, deleted, version
+    </sql>
+
+    <select id="selectCurrent" resultMap="SysStorageConfigMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_storage_config
+        WHERE deleted = 0
+        ORDER BY id ASC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.system.entity.SysStorageConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_storage_config (
+            storage_type, local_base_path, local_access_base_url, qiniu_access_key, qiniu_secret_key,
+            qiniu_bucket, qiniu_region, qiniu_domain, remark,
+            create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{storageType}, #{localBasePath}, #{localAccessBaseUrl}, #{qiniuAccessKey}, #{qiniuSecretKey},
+            #{qiniuBucket}, #{qiniuRegion}, #{qiniuDomain}, #{remark},
+            #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+    <update id="update" parameterType="xxqqyyy.community.modules.system.entity.SysStorageConfig">
+        UPDATE sys_storage_config
+        SET storage_type = #{storageType},
+            local_base_path = #{localBasePath},
+            local_access_base_url = #{localAccessBaseUrl},
+            qiniu_access_key = #{qiniuAccessKey},
+            qiniu_secret_key = #{qiniuSecretKey},
+            qiniu_bucket = #{qiniuBucket},
+            qiniu_region = #{qiniuRegion},
+            qiniu_domain = #{qiniuDomain},
+            remark = #{remark},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(1)
+        FROM sys_storage_config
+        WHERE deleted = 0
+    </select>
+
+    <update id="logicalDelete">
+        UPDATE sys_storage_config
+        SET deleted = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+</mapper>
+

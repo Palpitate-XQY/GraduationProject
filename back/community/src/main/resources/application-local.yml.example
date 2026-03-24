@@ -16,4 +16,10 @@ community:
     secret: your-32-byte-or-longer-secret
     expire-minutes: 120
     issuer: community-service
+  file-storage:
+    default-type: LOCAL
+    local-base-path: ./storage
+    local-access-base-url: /api/files
+    max-file-size-bytes: 20971520
 
+# 生产建议通过“系统管理-文件存储配置”接口维护七牛配置，而非写在 yml 中

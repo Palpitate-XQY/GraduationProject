@@ -180,6 +180,26 @@ INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (3, 'COMMU
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (4, 'PROPERTY_COMPANY', 4);
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (5, 'SELF', NULL);
 
+-- ========== 文件存储配置 ==========
+INSERT INTO sys_storage_config (
+    id, storage_type, local_base_path, local_access_base_url,
+    qiniu_access_key, qiniu_secret_key, qiniu_bucket, qiniu_region, qiniu_domain,
+    remark, create_by, update_by, deleted, version
+)
+VALUES
+    (1, 'LOCAL', './storage', '/api/files',
+     NULL, NULL, NULL, 'auto', NULL,
+     '默认本地存储，可由超级管理员切换为七牛云', 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    storage_type = VALUES(storage_type),
+    local_base_path = VALUES(local_base_path),
+    local_access_base_url = VALUES(local_access_base_url),
+    qiniu_region = VALUES(qiniu_region),
+    remark = VALUES(remark),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
 -- ========== 小区物业关系 ==========
 INSERT INTO biz_complex_property_rel (id, complex_org_id, property_company_org_id, status, create_by, update_by, deleted, version)
 VALUES (1, 3, 4, 1, 1, 1, 0, 0)
@@ -407,7 +427,11 @@ VALUES
 INSERT INTO sys_permission (id, permission_code, permission_name, permission_type, parent_id, path, method, sort, create_by, update_by, deleted, version)
 VALUES
     (1701, 'log:login:list', '登录日志查询', 'API', NULL, '/api/logs/logins', 'GET', 91, 1, 1, 0, 0),
-    (1702, 'log:operation:list', '操作日志查询', 'API', NULL, '/api/logs/operations', 'GET', 92, 1, 1, 0, 0)
+    (1702, 'log:operation:list', '操作日志查询', 'API', NULL, '/api/logs/operations', 'GET', 92, 1, 1, 0, 0),
+    (1801, 'file:upload', '文件上传', 'API', NULL, '/api/files/upload', 'POST', 101, 1, 1, 0, 0),
+    (1802, 'file:view', '文件查看与下载', 'API', NULL, '/api/files/{id}', 'GET', 102, 1, 1, 0, 0),
+    (1803, 'sys:storage:view', '查看文件存储配置', 'API', NULL, '/api/system/storage-config', 'GET', 103, 1, 1, 0, 0),
+    (1804, 'sys:storage:update', '更新文件存储配置', 'API', NULL, '/api/system/storage-config', 'PUT', 104, 1, 1, 0, 0)
 ON DUPLICATE KEY UPDATE
     permission_name = VALUES(permission_name),
     permission_type = VALUES(permission_type),
@@ -424,6 +448,14 @@ VALUES
     (2, 1701), (2, 1702),
     (3, 1701), (3, 1702),
     (4, 1701), (4, 1702)
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+VALUES
+    (2, 1801), (2, 1802),
+    (3, 1801), (3, 1802),
+    (4, 1801), (4, 1802),
+    (5, 1801), (5, 1802)
 ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
 
 -- ========== 超级管理员权限兜底同步 ==========

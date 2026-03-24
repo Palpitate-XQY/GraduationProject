@@ -3,6 +3,10 @@ spring:
     name: community-backend
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
@@ -43,4 +47,8 @@ community:
     secret: ${COMMUNITY_JWT_SECRET:CommunityServiceBackendJwtSecretKey2026!}
     expire-minutes: 120
     issuer: community-service
-
+  file-storage:
+    default-type: ${COMMUNITY_STORAGE_TYPE:LOCAL}
+    local-base-path: ${COMMUNITY_LOCAL_STORAGE_PATH:./storage}
+    local-access-base-url: /api/files
+    max-file-size-bytes: 20971520

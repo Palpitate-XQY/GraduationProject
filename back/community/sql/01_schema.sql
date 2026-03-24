@@ -120,6 +120,25 @@ CREATE TABLE IF NOT EXISTS sys_dict_data (
     version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字典数据表';
 
+CREATE TABLE IF NOT EXISTS sys_storage_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    storage_type VARCHAR(32) NOT NULL DEFAULT 'LOCAL' COMMENT '存储类型：LOCAL/QINIU',
+    local_base_path VARCHAR(255) DEFAULT NULL COMMENT '本地存储根目录',
+    local_access_base_url VARCHAR(255) DEFAULT '/api/files' COMMENT '本地访问前缀',
+    qiniu_access_key VARCHAR(255) DEFAULT NULL COMMENT '七牛AccessKey',
+    qiniu_secret_key VARCHAR(255) DEFAULT NULL COMMENT '七牛SecretKey',
+    qiniu_bucket VARCHAR(128) DEFAULT NULL COMMENT '七牛Bucket',
+    qiniu_region VARCHAR(32) DEFAULT 'auto' COMMENT '七牛区域：z0/z1/z2/na0/as0/auto',
+    qiniu_domain VARCHAR(255) DEFAULT NULL COMMENT '七牛访问域名',
+    remark VARCHAR(255) DEFAULT NULL COMMENT '备注',
+    create_by BIGINT DEFAULT NULL COMMENT '创建人ID',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by BIGINT DEFAULT NULL COMMENT '修改人ID',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删，1已删',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文件存储配置表';
+
 CREATE TABLE IF NOT EXISTS biz_complex_property_rel (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     complex_org_id BIGINT NOT NULL COMMENT '小区组织ID',
@@ -153,7 +172,7 @@ CREATE TABLE IF NOT EXISTS biz_file_info (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     biz_type VARCHAR(64) NOT NULL COMMENT '业务类型',
     biz_id BIGINT DEFAULT NULL COMMENT '业务ID',
-    storage_type VARCHAR(32) NOT NULL DEFAULT 'LOCAL' COMMENT '存储类型：LOCAL/MINIO',
+    storage_type VARCHAR(32) NOT NULL DEFAULT 'LOCAL' COMMENT '存储类型：LOCAL/QINIU',
     file_name VARCHAR(255) NOT NULL COMMENT '系统文件名',
     origin_file_name VARCHAR(255) NOT NULL COMMENT '原始文件名',
     file_path VARCHAR(512) NOT NULL COMMENT '文件路径',

@@ -16,6 +16,11 @@
 - 初始化脚本增加超级管理员权限兜底同步，避免增量权限漏授。
 - 初始化脚本补充居民角色 `RESIDENT`、居民示例账号与居民档案样例，支持居民端全流程联调。
 
+## 阶段5（附件能力增强）
+- 新增文件存储配置表：`sys_storage_config`，支持本地存储与七牛云存储切换。
+- 补充文件与存储权限：`file:upload`、`file:view`、`sys:storage:view`、`sys:storage:update`。
+- 调整 `biz_file_info.storage_type` 枚举说明为 `LOCAL/QINIU`。
+
 ## 升级约束
 - 升级脚本仍保持手工执行，不强依赖 Flyway/Liquibase。
 - 所有新增表继续遵循：`InnoDB + utf8mb4 + 中文注释 + 逻辑删除 + 审计字段 + 无外键`。

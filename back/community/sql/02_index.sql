@@ -43,6 +43,9 @@ CREATE INDEX idx_sys_dict_type_status_deleted ON sys_dict_type (status, deleted)
 CREATE INDEX idx_sys_dict_data_type_code ON sys_dict_data (dict_type_code);
 CREATE INDEX idx_sys_dict_data_status_deleted ON sys_dict_data (status, deleted);
 
+-- sys_storage_config
+CREATE INDEX idx_sys_storage_config_type_deleted ON sys_storage_config (storage_type, deleted);
+
 -- biz_complex_property_rel
 CREATE INDEX idx_biz_complex_property_rel_complex ON biz_complex_property_rel (complex_org_id);
 CREATE INDEX idx_biz_complex_property_rel_property ON biz_complex_property_rel (property_company_org_id);
