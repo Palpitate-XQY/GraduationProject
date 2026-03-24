@@ -58,5 +58,21 @@
         ORDER BY id DESC
     </select>
 
-</mapper>
+    <select id="selectByPropertyCompanyOrgId" resultMap="RelMap">
+        SELECT id, complex_org_id, property_company_org_id, status, create_by, create_time, update_by, update_time, deleted, version
+        FROM biz_complex_property_rel
+        WHERE property_company_org_id = #{propertyCompanyOrgId}
+          AND deleted = 0
+        ORDER BY id DESC
+    </select>
 
+    <select id="countActiveByPropertyAndComplex" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_complex_property_rel
+        WHERE property_company_org_id = #{propertyCompanyOrgId}
+          AND complex_org_id = #{complexOrgId}
+          AND status = 1
+          AND deleted = 0
+    </select>
+
+</mapper>

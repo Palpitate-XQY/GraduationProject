@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import xxqqyyy.community.common.enums.ErrorCode;
 import xxqqyyy.community.common.exception.BizException;
+import xxqqyyy.community.modules.org.entity.BizComplexPropertyRel;
+import xxqqyyy.community.modules.org.mapper.BizComplexPropertyRelMapper;
 import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
 import xxqqyyy.community.modules.system.entity.SysRoleScope;
 import xxqqyyy.community.modules.system.enums.DataScopeTypeEnum;
@@ -31,6 +33,7 @@ public class DataScopeServiceImpl implements DataScopeService {
     private final SysRoleMapper sysRoleMapper;
     private final SysRoleScopeMapper sysRoleScopeMapper;
     private final SysOrgMapper sysOrgMapper;
+    private final BizComplexPropertyRelMapper bizComplexPropertyRelMapper;
 
     @Override
     public DataScopeResult resolveByUserId(Long userId) {
@@ -51,6 +54,15 @@ public class DataScopeServiceImpl implements DataScopeService {
                 continue;
             }
             orgIds.add(refId);
+            if (DataScopeTypeEnum.PROPERTY_COMPANY.getCode().equalsIgnoreCase(scopeType)) {
+                List<BizComplexPropertyRel> relList = bizComplexPropertyRelMapper.selectByPropertyCompanyOrgId(refId);
+                for (BizComplexPropertyRel rel : relList) {
+                    if (rel.getStatus() == null || rel.getStatus() != 1 || rel.getComplexOrgId() == null) {
+                        continue;
+                    }
+                    orgIds.add(rel.getComplexOrgId());
+                }
+            }
             if (DataScopeTypeEnum.STREET.getCode().equalsIgnoreCase(scopeType)
                 || DataScopeTypeEnum.COMMUNITY.getCode().equalsIgnoreCase(scopeType)
                 || DataScopeTypeEnum.COMPLEX.getCode().equalsIgnoreCase(scopeType)
@@ -100,4 +112,3 @@ public class DataScopeServiceImpl implements DataScopeService {
         }
     }
 }
-

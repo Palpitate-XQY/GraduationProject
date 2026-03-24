@@ -19,5 +19,8 @@ public interface BizComplexPropertyRelMapper {
     int logicalDelete(@Param("id") Long id, @Param("updateBy") Long updateBy);
 
     List<BizComplexPropertyRel> selectByComplexOrgId(@Param("complexOrgId") Long complexOrgId);
-}
 
+    List<BizComplexPropertyRel> selectByPropertyCompanyOrgId(@Param("propertyCompanyOrgId") Long propertyCompanyOrgId);
+
+    long countActiveByPropertyAndComplex(@Param("propertyCompanyOrgId") Long propertyCompanyOrgId, @Param("complexOrgId") Long complexOrgId);
+}
