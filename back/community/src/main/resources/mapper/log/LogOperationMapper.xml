@@ -4,6 +4,22 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xxqqyyy.community.modules.log.mapper.LogOperationMapper">
 
+    <resultMap id="LogOperationMap" type="xxqqyyy.community.modules.log.entity.LogOperation">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="operationModule" column="operation_module"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="requestUri" column="request_uri"/>
+        <result property="requestMethod" column="request_method"/>
+        <result property="requestBody" column="request_body"/>
+        <result property="responseBody" column="response_body"/>
+        <result property="successFlag" column="success_flag"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="traceId" column="trace_id"/>
+        <result property="operationTime" column="operation_time"/>
+    </resultMap>
+
     <insert id="insert" parameterType="xxqqyyy.community.modules.log.entity.LogOperation" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO log_operation (
             user_id,
@@ -34,5 +50,61 @@
         )
     </insert>
 
-</mapper>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM log_operation o
+        WHERE 1 = 1
+          <if test="query.username != null and query.username != ''">
+              AND o.username LIKE CONCAT('%', #{query.username}, '%')
+          </if>
+          <if test="query.operationModule != null and query.operationModule != ''">
+              AND o.operation_module = #{query.operationModule}
+          </if>
+          <if test="query.operationType != null and query.operationType != ''">
+              AND o.operation_type = #{query.operationType}
+          </if>
+          <if test="query.successFlag != null">
+              AND o.success_flag = #{query.successFlag}
+          </if>
+          <if test="query.traceId != null and query.traceId != ''">
+              AND o.trace_id = #{query.traceId}
+          </if>
+          <if test="query.startTime != null">
+              AND o.operation_time <![CDATA[ >= ]]> #{query.startTime}
+          </if>
+          <if test="query.endTime != null">
+              AND o.operation_time <![CDATA[ <= ]]> #{query.endTime}
+          </if>
+    </select>
 
+    <select id="selectPage" resultMap="LogOperationMap">
+        SELECT id, user_id, username, operation_module, operation_type, request_uri, request_method, request_body,
+               response_body, success_flag, error_message, trace_id, operation_time
+        FROM log_operation o
+        WHERE 1 = 1
+          <if test="query.username != null and query.username != ''">
+              AND o.username LIKE CONCAT('%', #{query.username}, '%')
+          </if>
+          <if test="query.operationModule != null and query.operationModule != ''">
+              AND o.operation_module = #{query.operationModule}
+          </if>
+          <if test="query.operationType != null and query.operationType != ''">
+              AND o.operation_type = #{query.operationType}
+          </if>
+          <if test="query.successFlag != null">
+              AND o.success_flag = #{query.successFlag}
+          </if>
+          <if test="query.traceId != null and query.traceId != ''">
+              AND o.trace_id = #{query.traceId}
+          </if>
+          <if test="query.startTime != null">
+              AND o.operation_time <![CDATA[ >= ]]> #{query.startTime}
+          </if>
+          <if test="query.endTime != null">
+              AND o.operation_time <![CDATA[ <= ]]> #{query.endTime}
+          </if>
+        ORDER BY o.operation_time DESC, o.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+</mapper>

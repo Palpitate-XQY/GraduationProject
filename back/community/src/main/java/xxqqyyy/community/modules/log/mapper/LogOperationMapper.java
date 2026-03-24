@@ -1,6 +1,9 @@
 package xxqqyyy.community.modules.log.mapper;
 
+import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import xxqqyyy.community.modules.log.dto.OperationLogPageQuery;
 import xxqqyyy.community.modules.log.entity.LogOperation;
 
 /**
@@ -13,5 +16,12 @@ import xxqqyyy.community.modules.log.entity.LogOperation;
 public interface LogOperationMapper {
 
     int insert(LogOperation operation);
-}
 
+    long countPage(@Param("query") OperationLogPageQuery query);
+
+    List<LogOperation> selectPage(
+        @Param("query") OperationLogPageQuery query,
+        @Param("offset") long offset,
+        @Param("size") long size
+    );
+}
