@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.org.mapper.BizComplexPropertyRelMapper">
+
+    <resultMap id="RelMap" type="xxqqyyy.community.modules.org.entity.BizComplexPropertyRel">
+        <id property="id" column="id"/>
+        <result property="complexOrgId" column="complex_org_id"/>
+        <result property="propertyCompanyOrgId" column="property_company_org_id"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.org.entity.BizComplexPropertyRel" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_complex_property_rel (
+            complex_org_id,
+            property_company_org_id,
+            status,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            deleted,
+            version
+        ) VALUES (
+            #{complexOrgId},
+            #{propertyCompanyOrgId},
+            #{status},
+            #{createBy},
+            NOW(),
+            #{updateBy},
+            NOW(),
+            0,
+            0
+        )
+    </insert>
+
+    <update id="logicalDelete">
+        UPDATE biz_complex_property_rel
+        SET deleted = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="selectByComplexOrgId" resultMap="RelMap">
+        SELECT id, complex_org_id, property_company_org_id, status, create_by, create_time, update_by, update_time, deleted, version
+        FROM biz_complex_property_rel
+        WHERE complex_org_id = #{complexOrgId}
+          AND deleted = 0
+        ORDER BY id DESC
+    </select>
+
+</mapper>
+
