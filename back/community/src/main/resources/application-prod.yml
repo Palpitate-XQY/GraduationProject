@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${COMMUNITY_DB_URL}
+    username: ${COMMUNITY_DB_USERNAME}
+    password: ${COMMUNITY_DB_PASSWORD}
+  data:
+    redis:
+      host: ${COMMUNITY_REDIS_HOST}
+      port: ${COMMUNITY_REDIS_PORT:6379}
+      password: ${COMMUNITY_REDIS_PASSWORD:}
+      database: ${COMMUNITY_REDIS_DB:0}
+      timeout: 3s
+
+logging:
+  level:
+    xxqqyyy.community: INFO
+    org.mybatis: WARN
+
