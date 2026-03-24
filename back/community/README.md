@@ -9,6 +9,8 @@
 - 公告、活动、报修核心业务
 - 登录日志与操作日志查询
 - 居民注册与忘记密码（验证码重置）
+- 附件上传（活动/公告/报修）与文件元数据管理
+- 文件存储方式切换（本地/七牛云，超级管理员配置）
 
 ## 2. 技术栈
 - JDK 17
@@ -78,6 +80,13 @@ mvn clean spring-boot:run
 - `POST /api/auth/resident/register`
 - `POST /api/auth/password/reset-code`
 - `POST /api/auth/password/reset-by-code`
+
+## 10. 文件与存储配置接口
+- `POST /api/files/upload`
+- `GET /api/files/{id}`
+- `GET /api/files/{id}/download`
+- `GET /api/system/storage-config`（超级管理员）
+- `PUT /api/system/storage-config`（超级管理员）
 
 ## 10. 测试
 ```bash
