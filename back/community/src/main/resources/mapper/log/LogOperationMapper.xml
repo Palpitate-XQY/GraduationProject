@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.log.mapper.LogOperationMapper">
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.log.entity.LogOperation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO log_operation (
+            user_id,
+            username,
+            operation_module,
+            operation_type,
+            request_uri,
+            request_method,
+            request_body,
+            response_body,
+            success_flag,
+            error_message,
+            trace_id,
+            operation_time
+        ) VALUES (
+            #{userId},
+            #{username},
+            #{operationModule},
+            #{operationType},
+            #{requestUri},
+            #{requestMethod},
+            #{requestBody},
+            #{responseBody},
+            #{successFlag},
+            #{errorMessage},
+            #{traceId},
+            #{operationTime}
+        )
+    </insert>
+
+</mapper>
+
