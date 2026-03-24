@@ -357,3 +357,31 @@ VALUES
     (1, 'ACCEPTED', 'ASSIGNED', 'ASSIGN', 1, '分派维修员', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
     (1, 'ASSIGNED', 'PROCESSING', 'TAKE', 1, '维修员接单', DATE_SUB(NOW(), INTERVAL 4 HOUR)),
     (1, 'PROCESSING', 'WAIT_CONFIRM', 'SUBMIT', 1, '提交处理结果，等待居民确认', DATE_SUB(NOW(), INTERVAL 3 HOUR));
+
+-- ========== 日志查询权限 ==========
+INSERT INTO sys_permission (id, permission_code, permission_name, permission_type, parent_id, path, method, sort, create_by, update_by, deleted, version)
+VALUES
+    (1701, 'log:login:list', '登录日志查询', 'API', NULL, '/api/logs/logins', 'GET', 91, 1, 1, 0, 0),
+    (1702, 'log:operation:list', '操作日志查询', 'API', NULL, '/api/logs/operations', 'GET', 92, 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    permission_name = VALUES(permission_name),
+    permission_type = VALUES(permission_type),
+    parent_id = VALUES(parent_id),
+    path = VALUES(path),
+    method = VALUES(method),
+    sort = VALUES(sort),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+VALUES
+    (2, 1701), (2, 1702),
+    (3, 1701), (3, 1702),
+    (4, 1701), (4, 1702)
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+
+-- ========== 超级管理员权限兜底同步 ==========
+INSERT INTO sys_role_permission (role_id, permission_id)
+SELECT 1, id FROM sys_permission WHERE deleted = 0
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);

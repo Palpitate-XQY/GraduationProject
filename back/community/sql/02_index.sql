@@ -62,11 +62,13 @@ CREATE INDEX idx_biz_file_info_deleted ON biz_file_info (deleted);
 CREATE INDEX idx_log_login_user_id ON log_login (user_id);
 CREATE INDEX idx_log_login_success_time ON log_login (success_flag, login_time);
 CREATE INDEX idx_log_login_username_time ON log_login (username, login_time);
+CREATE INDEX idx_log_login_ip_time ON log_login (ip, login_time);
 
 -- log_operation
 CREATE INDEX idx_log_operation_user_id ON log_operation (user_id);
 CREATE INDEX idx_log_operation_module_time ON log_operation (operation_module, operation_time);
 CREATE INDEX idx_log_operation_trace_id ON log_operation (trace_id);
+CREATE INDEX idx_log_operation_success_time ON log_operation (success_flag, operation_time);
 
 -- biz_notice
 CREATE INDEX idx_biz_notice_type_status_deleted ON biz_notice (notice_type, status, deleted);
