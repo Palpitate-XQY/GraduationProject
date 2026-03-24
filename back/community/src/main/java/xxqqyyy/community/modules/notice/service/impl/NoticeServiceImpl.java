@@ -12,6 +12,8 @@ import org.springframework.util.CollectionUtils;
 import xxqqyyy.community.common.api.PageResult;
 import xxqqyyy.community.common.enums.ErrorCode;
 import xxqqyyy.community.common.exception.BizException;
+import xxqqyyy.community.common.util.MarkdownRenderService;
+import xxqqyyy.community.modules.file.service.FileBindingService;
 import xxqqyyy.community.modules.notice.dto.NoticeCreateRequest;
 import xxqqyyy.community.modules.notice.dto.NoticePageQuery;
 import xxqqyyy.community.modules.notice.dto.NoticeScopeItem;
@@ -49,6 +51,8 @@ public class NoticeServiceImpl implements NoticeService {
     private final DataScopeService dataScopeService;
     private final SysOrgMapper sysOrgMapper;
     private final BizComplexPropertyRelMapper bizComplexPropertyRelMapper;
+    private final FileBindingService fileBindingService;
+    private final MarkdownRenderService markdownRenderService;
 
     @Override
     public PageResult<NoticeVO> managePage(NoticePageQuery query) {
@@ -81,6 +85,7 @@ public class NoticeServiceImpl implements NoticeService {
     public void create(NoticeCreateRequest request) {
         LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
         validateScopes(request.getNoticeType(), request.getScopeItems(), principal);
+        fileBindingService.assertFileIdsValid(fileBindingService.collectFileIds(request.getCoverFileId(), request.getAttachmentJson()));
         BizNotice notice = new BizNotice();
         notice.setNoticeType(request.getNoticeType());
         notice.setTitle(request.getTitle());
@@ -93,6 +98,13 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setCreateBy(principal.getUserId());
         notice.setUpdateBy(principal.getUserId());
         bizNoticeMapper.insert(notice);
+        fileBindingService.bindForCreate(
+            "NOTICE",
+            notice.getId(),
+            request.getCoverFileId(),
+            request.getAttachmentJson(),
+            principal.getUserId()
+        );
         saveScopes(notice.getId(), request.getScopeItems());
     }
 
@@ -103,6 +115,9 @@ public class NoticeServiceImpl implements NoticeService {
         BizNotice notice = requireNotice(request.getId());
         assertManageVisible(notice);
         validateScopes(request.getNoticeType(), request.getScopeItems(), principal);
+        fileBindingService.assertFileIdsValid(fileBindingService.collectFileIds(request.getCoverFileId(), request.getAttachmentJson()));
+        Long oldCoverFileId = notice.getCoverFileId();
+        String oldAttachmentJson = notice.getAttachmentJson();
         notice.setNoticeType(request.getNoticeType());
         notice.setTitle(request.getTitle());
         notice.setContent(request.getContent());
@@ -111,6 +126,15 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setTopFlag(request.getTopFlag() == null ? 0 : request.getTopFlag());
         notice.setUpdateBy(principal.getUserId());
         bizNoticeMapper.update(notice);
+        fileBindingService.bindForUpdate(
+            "NOTICE",
+            notice.getId(),
+            oldCoverFileId,
+            oldAttachmentJson,
+            request.getCoverFileId(),
+            request.getAttachmentJson(),
+            principal.getUserId()
+        );
         saveScopes(notice.getId(), request.getScopeItems());
     }
 
@@ -288,6 +312,7 @@ public class NoticeServiceImpl implements NoticeService {
             .noticeType(notice.getNoticeType())
             .title(notice.getTitle())
             .content(notice.getContent())
+            .contentHtml(markdownRenderService.renderToHtml(notice.getContent()))
             .coverFileId(notice.getCoverFileId())
             .attachmentJson(notice.getAttachmentJson())
             .status(notice.getStatus())
@@ -299,4 +324,3 @@ public class NoticeServiceImpl implements NoticeService {
             .build();
     }
 }
-

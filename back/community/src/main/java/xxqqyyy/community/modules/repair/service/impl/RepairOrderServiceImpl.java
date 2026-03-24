@@ -19,7 +19,7 @@ import xxqqyyy.community.modules.org.entity.SysOrg;
 import xxqqyyy.community.modules.org.enums.OrgTypeEnum;
 import xxqqyyy.community.modules.org.mapper.BizComplexPropertyRelMapper;
 import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
-import xxqqyyy.community.modules.file.mapper.BizFileInfoMapper;
+import xxqqyyy.community.modules.file.service.FileBindingService;
 import xxqqyyy.community.modules.repair.dto.RepairAcceptRequest;
 import xxqqyyy.community.modules.repair.dto.RepairAssignRequest;
 import xxqqyyy.community.modules.repair.dto.RepairCloseRequest;
@@ -73,7 +73,7 @@ public class RepairOrderServiceImpl implements RepairOrderService {
     private final BizComplexPropertyRelMapper bizComplexPropertyRelMapper;
     private final SysOrgMapper sysOrgMapper;
     private final SysUserMapper sysUserMapper;
-    private final BizFileInfoMapper bizFileInfoMapper;
+    private final FileBindingService fileBindingService;
     private final DataScopeService dataScopeService;
 
     @Override
@@ -462,10 +462,7 @@ public class RepairOrderServiceImpl implements RepairOrderService {
         if (distinctIds.isEmpty()) {
             return;
         }
-        int validCount = bizFileInfoMapper.selectByIds(distinctIds).size();
-        if (validCount != distinctIds.size()) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "附件中存在无效文件ID");
-        }
+        fileBindingService.assertFileIdsValid(distinctIds);
         List<BizRepairAttachment> list = new ArrayList<>();
         for (Long fileId : distinctIds) {
             BizRepairAttachment attachment = new BizRepairAttachment();
@@ -591,4 +588,5 @@ public class RepairOrderServiceImpl implements RepairOrderService {
         }
         return rawRemark;
     }
+
 }

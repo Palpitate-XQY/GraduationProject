@@ -26,6 +26,11 @@ public class NoticeVO {
 
     private String content;
 
+    /**
+     * Markdown 渲染后的 HTML 内容。
+     */
+    private String contentHtml;
+
     private Long coverFileId;
 
     private String attachmentJson;
@@ -42,4 +47,3 @@ public class NoticeVO {
 
     private Set<NoticeScopeItem> scopeItems;
 }
-

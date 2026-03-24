@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import xxqqyyy.community.common.api.PageResult;
 import xxqqyyy.community.common.enums.ErrorCode;
 import xxqqyyy.community.common.exception.BizException;
+import xxqqyyy.community.common.util.MarkdownRenderService;
 import xxqqyyy.community.infrastructure.redis.ActivitySignupLimiter;
 import xxqqyyy.community.modules.activity.dto.ActivityCreateRequest;
 import xxqqyyy.community.modules.activity.dto.ActivityPageQuery;
@@ -29,6 +30,7 @@ import xxqqyyy.community.modules.activity.service.ActivityService;
 import xxqqyyy.community.modules.activity.vo.ActivitySignupVO;
 import xxqqyyy.community.modules.activity.vo.ActivityStatsVO;
 import xxqqyyy.community.modules.activity.vo.ActivityVO;
+import xxqqyyy.community.modules.file.service.FileBindingService;
 import xxqqyyy.community.modules.org.entity.SysOrg;
 import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
 import xxqqyyy.community.modules.system.enums.DataScopeTypeEnum;
@@ -53,6 +55,8 @@ public class ActivityServiceImpl implements ActivityService {
     private final DataScopeService dataScopeService;
     private final SysOrgMapper sysOrgMapper;
     private final ActivitySignupLimiter activitySignupLimiter;
+    private final FileBindingService fileBindingService;
+    private final MarkdownRenderService markdownRenderService;
 
     @Override
     public PageResult<ActivityVO> managePage(ActivityPageQuery query) {
@@ -86,6 +90,7 @@ public class ActivityServiceImpl implements ActivityService {
         LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
         validateTimeRange(request.getSignupStartTime(), request.getSignupEndTime(), request.getActivityStartTime(), request.getActivityEndTime());
         validateScopes(request.getScopeItems(), principal);
+        fileBindingService.assertFileIdsValid(fileBindingService.collectFileIds(request.getCoverFileId(), request.getAttachmentJson()));
         BizActivity activity = new BizActivity();
         activity.setTitle(request.getTitle());
         activity.setContent(request.getContent());
@@ -102,6 +107,13 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setCreateBy(principal.getUserId());
         activity.setUpdateBy(principal.getUserId());
         bizActivityMapper.insert(activity);
+        fileBindingService.bindForCreate(
+            "ACTIVITY",
+            activity.getId(),
+            request.getCoverFileId(),
+            request.getAttachmentJson(),
+            principal.getUserId()
+        );
         saveScopes(activity.getId(), request.getScopeItems());
     }
 
@@ -113,6 +125,9 @@ public class ActivityServiceImpl implements ActivityService {
         assertManageVisible(activity);
         validateTimeRange(request.getSignupStartTime(), request.getSignupEndTime(), request.getActivityStartTime(), request.getActivityEndTime());
         validateScopes(request.getScopeItems(), principal);
+        fileBindingService.assertFileIdsValid(fileBindingService.collectFileIds(request.getCoverFileId(), request.getAttachmentJson()));
+        Long oldCoverFileId = activity.getCoverFileId();
+        String oldAttachmentJson = activity.getAttachmentJson();
         activity.setTitle(request.getTitle());
         activity.setContent(request.getContent());
         activity.setCoverFileId(request.getCoverFileId());
@@ -125,6 +140,15 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setMaxParticipants(request.getMaxParticipants());
         activity.setUpdateBy(principal.getUserId());
         bizActivityMapper.update(activity);
+        fileBindingService.bindForUpdate(
+            "ACTIVITY",
+            activity.getId(),
+            oldCoverFileId,
+            oldAttachmentJson,
+            request.getCoverFileId(),
+            request.getAttachmentJson(),
+            principal.getUserId()
+        );
         saveScopes(activity.getId(), request.getScopeItems());
         activitySignupLimiter.evict(activity.getId());
     }
@@ -383,6 +407,7 @@ public class ActivityServiceImpl implements ActivityService {
             .id(activity.getId())
             .title(activity.getTitle())
             .content(activity.getContent())
+            .contentHtml(markdownRenderService.renderToHtml(activity.getContent()))
             .coverFileId(activity.getCoverFileId())
             .attachmentJson(activity.getAttachmentJson())
             .activityStartTime(activity.getActivityStartTime())
@@ -399,4 +424,3 @@ public class ActivityServiceImpl implements ActivityService {
             .build();
     }
 }
-
