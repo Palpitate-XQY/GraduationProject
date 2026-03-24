@@ -32,6 +32,9 @@ public class SecurityConfig {
 
     private static final String[] WHITE_LIST = {
         "/api/auth/login",
+        "/api/auth/resident/register",
+        "/api/auth/password/reset-code",
+        "/api/auth/password/reset-by-code",
         "/v3/api-docs/**",
         "/swagger-ui/**",
         "/swagger-ui.html",
@@ -83,4 +86,3 @@ public class SecurityConfig {
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage())));
     }
 }
-

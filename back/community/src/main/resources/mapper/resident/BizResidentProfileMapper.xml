@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.resident.mapper.BizResidentProfileMapper">
+
+    <resultMap id="ResidentProfileMap" type="xxqqyyy.community.modules.resident.entity.BizResidentProfile">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="communityOrgId" column="community_org_id"/>
+        <result property="complexOrgId" column="complex_org_id"/>
+        <result property="roomNo" column="room_no"/>
+        <result property="emergencyContact" column="emergency_contact"/>
+        <result property="emergencyPhone" column="emergency_phone"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="ResidentProfileMap">
+        SELECT id, user_id, community_org_id, complex_org_id, room_no, emergency_contact, emergency_phone,
+               create_by, create_time, update_by, update_time, deleted, version
+        FROM biz_resident_profile
+        WHERE user_id = #{userId}
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.resident.entity.BizResidentProfile" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_resident_profile (
+            user_id, community_org_id, complex_org_id, room_no, emergency_contact, emergency_phone,
+            create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{userId}, #{communityOrgId}, #{complexOrgId}, #{roomNo}, #{emergencyContact}, #{emergencyPhone},
+            #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+</mapper>
