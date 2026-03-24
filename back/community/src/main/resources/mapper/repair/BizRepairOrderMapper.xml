@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.repair.mapper.BizRepairOrderMapper">
+
+    <resultMap id="RepairOrderMap" type="xxqqyyy.community.modules.repair.entity.BizRepairOrder">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="repairAddress" column="repair_address"/>
+        <result property="emergencyLevel" column="emergency_level"/>
+        <result property="expectHandleTime" column="expect_handle_time"/>
+        <result property="status" column="status"/>
+        <result property="communityOrgId" column="community_org_id"/>
+        <result property="complexOrgId" column="complex_org_id"/>
+        <result property="propertyCompanyOrgId" column="property_company_org_id"/>
+        <result property="residentUserId" column="resident_user_id"/>
+        <result property="acceptUserId" column="accept_user_id"/>
+        <result property="assignUserId" column="assign_user_id"/>
+        <result property="maintainerUserId" column="maintainer_user_id"/>
+        <result property="processDesc" column="process_desc"/>
+        <result property="finishDesc" column="finish_desc"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="residentFeedback" column="resident_feedback"/>
+        <result property="evaluateScore" column="evaluate_score"/>
+        <result property="evaluateContent" column="evaluate_content"/>
+        <result property="urgeCount" column="urge_count"/>
+        <result property="acceptedTime" column="accepted_time"/>
+        <result property="assignedTime" column="assigned_time"/>
+        <result property="processingTime" column="processing_time"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="confirmTime" column="confirm_time"/>
+        <result property="closedTime" column="closed_time"/>
+        <result property="lastUrgeTime" column="last_urge_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, order_no, title, description, contact_phone, repair_address, emergency_level, expect_handle_time,
+        status, community_org_id, complex_org_id, property_company_org_id, resident_user_id, accept_user_id,
+        assign_user_id, maintainer_user_id, process_desc, finish_desc, reject_reason, resident_feedback,
+        evaluate_score, evaluate_content, urge_count, accepted_time, assigned_time, processing_time, finish_time,
+        confirm_time, closed_time, last_urge_time, create_by, create_time, update_by, update_time, deleted, version
+    </sql>
+
+    <select id="selectById" resultMap="RepairOrderMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_repair_order
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.repair.entity.BizRepairOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_repair_order (
+            order_no, title, description, contact_phone, repair_address, emergency_level, expect_handle_time,
+            status, community_org_id, complex_org_id, property_company_org_id, resident_user_id, accept_user_id,
+            assign_user_id, maintainer_user_id, process_desc, finish_desc, reject_reason, resident_feedback,
+            evaluate_score, evaluate_content, urge_count, accepted_time, assigned_time, processing_time, finish_time,
+            confirm_time, closed_time, last_urge_time, create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{orderNo}, #{title}, #{description}, #{contactPhone}, #{repairAddress}, #{emergencyLevel}, #{expectHandleTime},
+            #{status}, #{communityOrgId}, #{complexOrgId}, #{propertyCompanyOrgId}, #{residentUserId}, #{acceptUserId},
+            #{assignUserId}, #{maintainerUserId}, #{processDesc}, #{finishDesc}, #{rejectReason}, #{residentFeedback},
+            #{evaluateScore}, #{evaluateContent}, #{urgeCount}, #{acceptedTime}, #{assignedTime}, #{processingTime}, #{finishTime},
+            #{confirmTime}, #{closedTime}, #{lastUrgeTime}, #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+    <update id="updateSelective" parameterType="xxqqyyy.community.modules.repair.entity.BizRepairOrder">
+        UPDATE biz_repair_order
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="repairAddress != null">repair_address = #{repairAddress},</if>
+            <if test="emergencyLevel != null">emergency_level = #{emergencyLevel},</if>
+            <if test="expectHandleTime != null">expect_handle_time = #{expectHandleTime},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="communityOrgId != null">community_org_id = #{communityOrgId},</if>
+            <if test="complexOrgId != null">complex_org_id = #{complexOrgId},</if>
+            <if test="propertyCompanyOrgId != null">property_company_org_id = #{propertyCompanyOrgId},</if>
+            <if test="residentUserId != null">resident_user_id = #{residentUserId},</if>
+            <if test="acceptUserId != null">accept_user_id = #{acceptUserId},</if>
+            <if test="assignUserId != null">assign_user_id = #{assignUserId},</if>
+            <if test="maintainerUserId != null">maintainer_user_id = #{maintainerUserId},</if>
+            <if test="processDesc != null">process_desc = #{processDesc},</if>
+            <if test="finishDesc != null">finish_desc = #{finishDesc},</if>
+            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
+            <if test="residentFeedback != null">resident_feedback = #{residentFeedback},</if>
+            <if test="evaluateScore != null">evaluate_score = #{evaluateScore},</if>
+            <if test="evaluateContent != null">evaluate_content = #{evaluateContent},</if>
+            <if test="urgeCount != null">urge_count = #{urgeCount},</if>
+            <if test="acceptedTime != null">accepted_time = #{acceptedTime},</if>
+            <if test="assignedTime != null">assigned_time = #{assignedTime},</if>
+            <if test="processingTime != null">processing_time = #{processingTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="closedTime != null">closed_time = #{closedTime},</if>
+            <if test="lastUrgeTime != null">last_urge_time = #{lastUrgeTime},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="countMyPage" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.resident_user_id = #{residentUserId}
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (o.title LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR o.order_no LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND o.status = #{query.status}
+          </if>
+          <if test="query.createStartTime != null">
+              AND o.create_time &gt;= #{query.createStartTime}
+          </if>
+          <if test="query.createEndTime != null">
+              AND o.create_time &lt;= #{query.createEndTime}
+          </if>
+    </select>
+
+    <select id="selectMyPage" resultMap="RepairOrderMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.resident_user_id = #{residentUserId}
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (o.title LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR o.order_no LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND o.status = #{query.status}
+          </if>
+          <if test="query.createStartTime != null">
+              AND o.create_time &gt;= #{query.createStartTime}
+          </if>
+          <if test="query.createEndTime != null">
+              AND o.create_time &lt;= #{query.createEndTime}
+          </if>
+        ORDER BY o.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countManagePage" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (o.title LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR o.order_no LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND o.status = #{query.status}
+          </if>
+          <if test="query.complexOrgId != null">
+              AND o.complex_org_id = #{query.complexOrgId}
+          </if>
+          <if test="query.propertyCompanyOrgId != null">
+              AND o.property_company_org_id = #{query.propertyCompanyOrgId}
+          </if>
+          <if test="query.maintainerUserId != null">
+              AND o.maintainer_user_id = #{query.maintainerUserId}
+          </if>
+          <if test="query.residentUserId != null">
+              AND o.resident_user_id = #{query.residentUserId}
+          </if>
+          <if test="query.createStartTime != null">
+              AND o.create_time &gt;= #{query.createStartTime}
+          </if>
+          <if test="query.createEndTime != null">
+              AND o.create_time &lt;= #{query.createEndTime}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="selectManagePage" resultMap="RepairOrderMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (o.title LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR o.order_no LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND o.status = #{query.status}
+          </if>
+          <if test="query.complexOrgId != null">
+              AND o.complex_org_id = #{query.complexOrgId}
+          </if>
+          <if test="query.propertyCompanyOrgId != null">
+              AND o.property_company_org_id = #{query.propertyCompanyOrgId}
+          </if>
+          <if test="query.maintainerUserId != null">
+              AND o.maintainer_user_id = #{query.maintainerUserId}
+          </if>
+          <if test="query.residentUserId != null">
+              AND o.resident_user_id = #{query.residentUserId}
+          </if>
+          <if test="query.createStartTime != null">
+              AND o.create_time &gt;= #{query.createStartTime}
+          </if>
+          <if test="query.createEndTime != null">
+              AND o.create_time &lt;= #{query.createEndTime}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+        ORDER BY o.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+</mapper>

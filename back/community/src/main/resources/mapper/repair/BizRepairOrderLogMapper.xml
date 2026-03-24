@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.repair.mapper.BizRepairOrderLogMapper">
+
+    <resultMap id="RepairOrderLogMap" type="xxqqyyy.community.modules.repair.entity.BizRepairOrderLog">
+        <id property="id" column="id"/>
+        <result property="repairOrderId" column="repair_order_id"/>
+        <result property="fromStatus" column="from_status"/>
+        <result property="toStatus" column="to_status"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="operatorUserId" column="operator_user_id"/>
+        <result property="operationRemark" column="operation_remark"/>
+        <result property="operationTime" column="operation_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.repair.entity.BizRepairOrderLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_repair_order_log (
+            repair_order_id, from_status, to_status, operation_type, operator_user_id, operation_remark, operation_time
+        ) VALUES (
+            #{repairOrderId}, #{fromStatus}, #{toStatus}, #{operationType}, #{operatorUserId}, #{operationRemark}, NOW()
+        )
+    </insert>
+
+    <select id="selectByRepairOrderId" resultMap="RepairOrderLogMap">
+        SELECT id, repair_order_id, from_status, to_status, operation_type, operator_user_id, operation_remark, operation_time
+        FROM biz_repair_order_log
+        WHERE repair_order_id = #{repairOrderId}
+        ORDER BY id ASC
+    </select>
+
+</mapper>
