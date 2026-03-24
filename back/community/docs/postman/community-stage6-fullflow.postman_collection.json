@@ -1,0 +1,1180 @@
+{
+  "info": {
+    "_postman_id": "4cfa8a89-6ad9-4db9-8303-592fced64f73",
+    "name": "community-stage6-fullflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Stage6 full-flow collection. Run in this order: Auth -> Storage -> Upload -> Notice -> Activity -> UserRole -> Repair -> Org -> Logs."
+  },
+  "item": [
+    {
+      "name": "认证",
+      "item": [
+        {
+          "name": "01-admin-login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Pre: none. Assert: HTTP 200, code=0, save adminToken and run variables.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('adminToken', body.data.accessToken);",
+                  "const d = new Date();",
+                  "const p = n => String(n).padStart(2, '0');",
+                  "const suffix = d.getFullYear().toString().slice(-2) + p(d.getMonth() + 1) + p(d.getDate()) + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());",
+                  "pm.environment.set('residentUsername', `resident_stage6_${suffix}`);",
+                  "pm.environment.set('residentPhone', `1399${Math.floor(Math.random() * 9000000 + 1000000)}`);",
+                  "pm.environment.set('noticeTitle', `stage6_notice_${suffix}`);",
+                  "pm.environment.set('activityTitle', `stage6_activity_${suffix}`);",
+                  "pm.environment.set('repairTitle', `stage6_repair_${suffix}`);",
+                  "pm.environment.set('propAdminUsername', `prop_admin_${suffix}`);",
+                  "pm.environment.set('maintUsername', `maint_${suffix}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-resident-register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/resident/register",
+            "description": "Pre: admin-login done. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{residentUsername}}\",\n  \"password\": \"{{residentPassword}}\",\n  \"nickname\": \"stage6-resident\",\n  \"phone\": \"{{residentPhone}}\",\n  \"email\": \"{{residentUsername}}@test.local\",\n  \"complexOrgId\": {{complexOrgId}},\n  \"roomNo\": \"6-2-1201\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-send-reset-code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/password/reset-code",
+            "description": "Pre: resident-register done. Assert: code=0, save resetCode.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{residentUsername}}\",\n  \"phone\": \"{{residentPhone}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('resetCode', body.data.debugCode);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04-reset-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/password/reset-by-code",
+            "description": "Pre: resetCode saved. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{residentUsername}}\",\n  \"phone\": \"{{residentPhone}}\",\n  \"code\": \"{{resetCode}}\",\n  \"newPassword\": \"{{residentNewPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05-resident-login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Pre: reset-password done. Assert: code=0, save residentToken.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{residentUsername}}\",\n  \"password\": \"{{residentNewPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('residentToken', body.data.accessToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "存储配置",
+      "item": [
+        {
+          "name": "01-set-local",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/storage-config",
+            "description": "Pre: adminToken. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storageType\": \"LOCAL\",\n  \"localBasePath\": \"./storage\",\n  \"localAccessBaseUrl\": \"/api/files\",\n  \"remark\": \"stage6-local\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "文件上传",
+      "item": [
+        {
+          "name": "01-upload-notice-file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/files/upload",
+            "description": "Pre: noticeFilePath exists. Assert: code=0 and save noticeFileId.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{noticeFilePath}}"
+                },
+                {
+                  "key": "bizType",
+                  "type": "text",
+                  "value": "NOTICE"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('noticeFileId', body.data.id);",
+                  "pm.environment.set('noticeAttachmentJson', JSON.stringify({attachments:[{fileId:Number(body.data.id)}]}));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-upload-activity-file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/files/upload",
+            "description": "Pre: activityFilePath exists. Assert: code=0 and save activityFileId.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{activityFilePath}}"
+                },
+                {
+                  "key": "bizType",
+                  "type": "text",
+                  "value": "ACTIVITY"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('activityFileId', body.data.id);",
+                  "pm.environment.set('activityAttachmentJson', JSON.stringify({attachments:[{fileId:Number(body.data.id)}]}));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-upload-repair-file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/files/upload",
+            "description": "Pre: repairFilePath exists. Assert: code=0 and save repairFileId.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{repairFilePath}}"
+                },
+                {
+                  "key": "bizType",
+                  "type": "text",
+                  "value": "REPAIR"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('repairFileId', body.data.id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "公告",
+      "item": [
+        {
+          "name": "01-create-notice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/notices",
+            "description": "Pre: noticeFileId available. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"noticeType\": \"STREET_COMMUNITY\",\n  \"title\": \"{{noticeTitle}}\",\n  \"content\": \"# Stage6 Notice\\n- markdown\\n- attachment\",\n  \"coverFileId\": {{noticeFileId}},\n  \"attachmentJson\": \"{{noticeAttachmentJson}}\",\n  \"topFlag\": 1,\n  \"scopeItems\": [{\"scopeType\": \"COMMUNITY\", \"scopeRefId\": {{communityOrgId}}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-publish-notice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/notices?current=1&size=100",
+            "description": "Pre: notice created. Assert: code=0 and save noticeId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "const n=(body.data.records||[]).find(it=>it.title===pm.environment.get('noticeTitle'))||(body.data.records||[]).find(it=>String(it.coverFileId)===String(pm.environment.get('noticeFileId')));",
+                  "pm.expect(n).to.exist;",
+                  "pm.environment.set('noticeId', n.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-notice-publish-action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/notices/{{noticeId}}/publish",
+            "description": "Pre: noticeId. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "活动",
+      "item": [
+        {
+          "name": "01-create-activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/activities",
+            "description": "Pre: activityFileId available. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{activityTitle}}\",\n  \"content\": \"# Stage6 Activity\\nplease join\",\n  \"coverFileId\": {{activityFileId}},\n  \"attachmentJson\": \"{{activityAttachmentJson}}\",\n  \"activityStartTime\": \"{{activityStartTime}}\",\n  \"activityEndTime\": \"{{activityEndTime}}\",\n  \"signupStartTime\": \"{{signupStartTime}}\",\n  \"signupEndTime\": \"{{signupEndTime}}\",\n  \"location\": \"hall-a\",\n  \"maxParticipants\": 30,\n  \"scopeItems\": [{\"scopeType\": \"COMPLEX\", \"scopeRefId\": {{complexOrgId}}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const now = new Date();",
+                  "const fmt = d => d.toISOString().slice(0, 19);",
+                  "pm.environment.set('signupStartTime', fmt(new Date(now.getTime() - 10 * 60 * 1000)));",
+                  "pm.environment.set('signupEndTime', fmt(new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000)));",
+                  "pm.environment.set('activityStartTime', fmt(new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)));",
+                  "pm.environment.set('activityEndTime', fmt(new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-publish-activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/activities?current=1&size=100",
+            "description": "Pre: activity created. Assert: code=0 and save activityId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "const a=(body.data.records||[]).find(it=>it.title===pm.environment.get('activityTitle'))||(body.data.records||[]).find(it=>String(it.coverFileId)===String(pm.environment.get('activityFileId')));",
+                  "pm.expect(a).to.exist;",
+                  "pm.environment.set('activityId', a.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-activity-publish-action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/activities/{{activityId}}/publish",
+            "description": "Pre: activityId. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04-signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/activities/{{activityId}}/signup",
+            "description": "Pre: activity published and in signup window. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05-cancel-signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/activities/{{activityId}}/cancel-signup",
+            "description": "Pre: signed up. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "用户角色权限",
+      "item": [
+        {
+          "name": "01-get-property-role-id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/roles?current=1&size=100",
+            "description": "Pre: adminToken. Assert: code=0, save propertyRoleId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "const role=(body.data.records||[]).find(r=>r.roleCode==='PROPERTY_ADMIN');",
+                  "pm.expect(role).to.exist;",
+                  "pm.environment.set('propertyRoleId', role.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-create-property-admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/users",
+            "description": "Pre: propertyRoleId. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{propAdminUsername}}\",\n  \"password\": \"{{propAdminPassword}}\",\n  \"nickname\": \"prop-admin\",\n  \"phone\": \"13711112222\",\n  \"orgId\": {{propertyCompanyOrgId}},\n  \"status\": 1,\n  \"roleIds\": [{{propertyRoleId}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-create-maintainer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/users",
+            "description": "Pre: propertyRoleId. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{maintUsername}}\",\n  \"password\": \"{{maintPassword}}\",\n  \"nickname\": \"maint\",\n  \"phone\": \"13722223333\",\n  \"orgId\": {{propertyCompanyOrgId}},\n  \"status\": 1,\n  \"roleIds\": [{{propertyRoleId}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04-login-property-admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Pre: property-admin created. Assert: code=0, save propAdminToken.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{propAdminUsername}}\",\n  \"password\": \"{{propAdminPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('propAdminToken', body.data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05-login-maintainer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Pre: maintainer created. Assert: code=0, save maintToken.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{maintUsername}}\",\n  \"password\": \"{{maintPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.environment.set('maintToken', body.data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06-get-maintainer-id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/users?current=1&size=100",
+            "description": "Pre: maintainer created. Assert: code=0, save maintUserId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "const u=(body.data.records||[]).find(it=>it.username===pm.environment.get('maintUsername'));",
+                  "pm.expect(u).to.exist;",
+                  "pm.environment.set('maintUserId', u.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07-forbidden-check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system/users?current=1&size=10",
+            "description": "Pre: residentToken. Assert: code=403."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(403);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "报修",
+      "item": [
+        {
+          "name": "01-create-repair",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs",
+            "description": "Pre: repairFileId, residentToken. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{repairTitle}}\",\n  \"description\": \"kitchen tap leaking\",\n  \"contactPhone\": \"{{residentPhone}}\",\n  \"repairAddress\": \"happy-home-6-2-1201\",\n  \"emergencyLevel\": \"MEDIUM\",\n  \"expectHandleTime\": \"{{repairExpectHandleTime}}\",\n  \"complexOrgId\": {{complexOrgId}},\n  \"propertyCompanyOrgId\": {{propertyCompanyOrgId}},\n  \"attachmentFileIds\": [{{repairFileId}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = new Date(Date.now() + 24 * 60 * 60 * 1000);",
+                  "pm.environment.set('repairExpectHandleTime', d.toISOString().slice(0, 19));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-get-repair-id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/my?current=1&size=50&keyword={{repairTitle}}",
+            "description": "Pre: repair created. Assert: code=0 and save repairId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "const r=(body.data.records||[]).find(it=>it.title===pm.environment.get('repairTitle'));",
+                  "pm.expect(r).to.exist;",
+                  "pm.environment.set('repairId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03-accept",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{propAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/accept",
+            "description": "Pre: propAdminToken + repairId. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remark\": \"accepted\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04-assign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{propAdminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/assign",
+            "description": "Pre: maintUserId available. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintainerUserId\": {{maintUserId}},\n  \"remark\": \"assign\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05-take",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{maintToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/take",
+            "description": "Pre: assigned. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remark\": \"take\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06-submit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{maintToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/submit",
+            "description": "Pre: taken. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"finishDesc\": \"finished\",\n  \"attachmentFileIds\": [{{repairFileId}}]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07-confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/confirm",
+            "description": "Pre: submitted. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remark\": \"resolved\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08-evaluate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{residentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/repairs/{{repairId}}/evaluate",
+            "description": "Pre: confirmed. Assert: code=0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 5,\n  \"content\": \"good\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "组织",
+      "item": [
+        {
+          "name": "01-org-tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/org/tree",
+            "description": "Pre: adminToken. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body=pm.response.json();",
+                  "pm.expect(body.code).to.eql(0);",
+                  "pm.expect(body.data.id).to.exist;"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "日志",
+      "item": [
+        {
+          "name": "01-login-logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/logs/logins?current=1&size=10",
+            "description": "Pre: adminToken. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02-operation-logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/logs/operations?current=1&size=10",
+            "description": "Pre: adminToken. Assert: code=0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.expect(pm.response.json().code).to.eql(0);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "{{baseUrl}}"
+    }
+  ]
+}
