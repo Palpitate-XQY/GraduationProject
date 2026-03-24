@@ -266,3 +266,94 @@ INSERT INTO sys_dict_data (dict_type_code, dict_label, dict_value, sort, status,
 ('repair_status', '已驳回', 'REJECTED', 8, 1, 1, 1, 0, 0),
 ('repair_status', '重新处理', 'REOPENED', 9, 1, 1, 1, 0, 0);
 
+
+-- ========== 报修权限初始化 ==========
+INSERT INTO sys_permission (id, permission_code, permission_name, permission_type, parent_id, path, method, sort, create_by, update_by, deleted, version)
+VALUES
+    (1601, 'repair:create', '居民创建报修', 'API', NULL, '/api/repairs', 'POST', 71, 1, 1, 0, 0),
+    (1602, 'repair:my:list', '我的报修列表', 'API', NULL, '/api/repairs/my', 'GET', 72, 1, 1, 0, 0),
+    (1603, 'repair:my:view', '我的报修详情', 'API', NULL, '/api/repairs/my/{id}', 'GET', 73, 1, 1, 0, 0),
+    (1604, 'repair:manage:list', '物业工单列表', 'API', NULL, '/api/repairs/manage', 'GET', 74, 1, 1, 0, 0),
+    (1605, 'repair:manage:view', '物业工单详情', 'API', NULL, '/api/repairs/{id}', 'GET', 75, 1, 1, 0, 0),
+    (1606, 'repair:accept', '物业受理工单', 'API', NULL, '/api/repairs/{id}/accept', 'POST', 76, 1, 1, 0, 0),
+    (1607, 'repair:reject', '物业驳回工单', 'API', NULL, '/api/repairs/{id}/reject', 'POST', 77, 1, 1, 0, 0),
+    (1608, 'repair:assign', '物业分派工单', 'API', NULL, '/api/repairs/{id}/assign', 'POST', 78, 1, 1, 0, 0),
+    (1609, 'repair:take', '维修员接单', 'API', NULL, '/api/repairs/{id}/take', 'POST', 79, 1, 1, 0, 0),
+    (1610, 'repair:process', '维修员处理工单', 'API', NULL, '/api/repairs/{id}/process', 'POST', 80, 1, 1, 0, 0),
+    (1611, 'repair:submit', '维修员提交结果', 'API', NULL, '/api/repairs/{id}/submit', 'POST', 81, 1, 1, 0, 0),
+    (1612, 'repair:confirm', '居民确认解决', 'API', NULL, '/api/repairs/{id}/confirm', 'POST', 82, 1, 1, 0, 0),
+    (1613, 'repair:reopen', '居民反馈未解决', 'API', NULL, '/api/repairs/{id}/reopen', 'POST', 83, 1, 1, 0, 0),
+    (1614, 'repair:evaluate', '居民评价工单', 'API', NULL, '/api/repairs/{id}/evaluate', 'POST', 84, 1, 1, 0, 0),
+    (1615, 'repair:log:view', '查看工单流转日志', 'API', NULL, '/api/repairs/{id}/logs', 'GET', 85, 1, 1, 0, 0),
+    (1616, 'repair:urge', '居民催单', 'API', NULL, '/api/repairs/{id}/urge', 'POST', 86, 1, 1, 0, 0),
+    (1617, 'repair:close', '物业关闭工单', 'API', NULL, '/api/repairs/{id}/close', 'POST', 87, 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    permission_name = VALUES(permission_name),
+    permission_type = VALUES(permission_type),
+    parent_id = VALUES(parent_id),
+    path = VALUES(path),
+    method = VALUES(method),
+    sort = VALUES(sort),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+VALUES
+    (2, 1601), (2, 1602), (2, 1603), (2, 1604), (2, 1605), (2, 1606), (2, 1607), (2, 1608), (2, 1609), (2, 1610),
+    (2, 1611), (2, 1612), (2, 1613), (2, 1614), (2, 1615), (2, 1616), (2, 1617),
+    (3, 1601), (3, 1602), (3, 1603), (3, 1604), (3, 1605), (3, 1606), (3, 1607), (3, 1608), (3, 1609), (3, 1610),
+    (3, 1611), (3, 1612), (3, 1613), (3, 1614), (3, 1615), (3, 1616), (3, 1617),
+    (4, 1601), (4, 1602), (4, 1603), (4, 1604), (4, 1605), (4, 1606), (4, 1607), (4, 1608), (4, 1609), (4, 1610),
+    (4, 1611), (4, 1612), (4, 1613), (4, 1614), (4, 1615), (4, 1616), (4, 1617)
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+
+-- ========== 报修示例数据 ==========
+INSERT INTO biz_repair_order (
+    id, order_no, title, description, contact_phone, repair_address, emergency_level, expect_handle_time,
+    status, community_org_id, complex_org_id, property_company_org_id, resident_user_id,
+    accept_user_id, assign_user_id, maintainer_user_id, process_desc, finish_desc, resident_feedback,
+    evaluate_score, evaluate_content, urge_count, accepted_time, assigned_time, processing_time, finish_time,
+    confirm_time, closed_time, last_urge_time, create_by, update_by, deleted, version
+)
+VALUES
+    (1, 'RP202603240001', '厨房水管漏水', '厨房水槽下方持续漏水，影响正常生活。', '13800000000', '幸福家园小区1栋2单元301', 'HIGH', DATE_ADD(NOW(), INTERVAL 2 HOUR),
+     'WAIT_CONFIRM', 2, 3, 4, 1,
+     1, 1, 1, '已更换破损软管并测试。', '现场处理完成，观察30分钟未再漏水。', NULL,
+     NULL, NULL, 1, DATE_SUB(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 5 HOUR), DATE_SUB(NOW(), INTERVAL 4 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR),
+     NULL, NULL, DATE_SUB(NOW(), INTERVAL 8 HOUR), 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    title = VALUES(title),
+    description = VALUES(description),
+    contact_phone = VALUES(contact_phone),
+    repair_address = VALUES(repair_address),
+    emergency_level = VALUES(emergency_level),
+    expect_handle_time = VALUES(expect_handle_time),
+    status = VALUES(status),
+    community_org_id = VALUES(community_org_id),
+    complex_org_id = VALUES(complex_org_id),
+    property_company_org_id = VALUES(property_company_org_id),
+    resident_user_id = VALUES(resident_user_id),
+    accept_user_id = VALUES(accept_user_id),
+    assign_user_id = VALUES(assign_user_id),
+    maintainer_user_id = VALUES(maintainer_user_id),
+    process_desc = VALUES(process_desc),
+    finish_desc = VALUES(finish_desc),
+    urge_count = VALUES(urge_count),
+    accepted_time = VALUES(accepted_time),
+    assigned_time = VALUES(assigned_time),
+    processing_time = VALUES(processing_time),
+    finish_time = VALUES(finish_time),
+    last_urge_time = VALUES(last_urge_time),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
+DELETE FROM biz_repair_order_log WHERE repair_order_id = 1;
+INSERT INTO biz_repair_order_log (repair_order_id, from_status, to_status, operation_type, operator_user_id, operation_remark, operation_time)
+VALUES
+    (1, NULL, 'PENDING_ACCEPT', 'CREATE', 1, '居民发起报修', DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+    (1, 'PENDING_ACCEPT', 'ACCEPTED', 'ACCEPT', 1, '物业受理工单', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+    (1, 'ACCEPTED', 'ASSIGNED', 'ASSIGN', 1, '分派维修员', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+    (1, 'ASSIGNED', 'PROCESSING', 'TAKE', 1, '维修员接单', DATE_SUB(NOW(), INTERVAL 4 HOUR)),
+    (1, 'PROCESSING', 'WAIT_CONFIRM', 'SUBMIT', 1, '提交处理结果，等待居民确认', DATE_SUB(NOW(), INTERVAL 3 HOUR));

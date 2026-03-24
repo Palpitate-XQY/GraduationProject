@@ -265,3 +265,63 @@ CREATE TABLE IF NOT EXISTS biz_activity_signup (
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删，1已删',
     version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动报名表';
+
+CREATE TABLE IF NOT EXISTS biz_repair_order (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    order_no VARCHAR(64) NOT NULL COMMENT '工单编号',
+    title VARCHAR(200) NOT NULL COMMENT '报修标题',
+    description TEXT NOT NULL COMMENT '问题描述',
+    contact_phone VARCHAR(20) NOT NULL COMMENT '联系方式',
+    repair_address VARCHAR(255) NOT NULL COMMENT '报修位置',
+    emergency_level VARCHAR(32) NOT NULL COMMENT '紧急程度',
+    expect_handle_time DATETIME DEFAULT NULL COMMENT '期望处理时间',
+    status VARCHAR(32) NOT NULL COMMENT '工单状态：PENDING_ACCEPT/ACCEPTED/ASSIGNED/PROCESSING/WAIT_CONFIRM/DONE/CLOSED/REJECTED/REOPENED',
+    community_org_id BIGINT NOT NULL COMMENT '所属社区组织ID',
+    complex_org_id BIGINT NOT NULL COMMENT '所属小区组织ID',
+    property_company_org_id BIGINT NOT NULL COMMENT '对应物业公司组织ID',
+    resident_user_id BIGINT NOT NULL COMMENT '居民用户ID',
+    accept_user_id BIGINT DEFAULT NULL COMMENT '受理人用户ID',
+    assign_user_id BIGINT DEFAULT NULL COMMENT '分派人用户ID',
+    maintainer_user_id BIGINT DEFAULT NULL COMMENT '维修员用户ID',
+    process_desc TEXT COMMENT '处理过程说明',
+    finish_desc TEXT COMMENT '完成说明',
+    reject_reason VARCHAR(500) DEFAULT NULL COMMENT '驳回原因',
+    resident_feedback VARCHAR(500) DEFAULT NULL COMMENT '居民未解决反馈',
+    evaluate_score INT DEFAULT NULL COMMENT '居民评价分数',
+    evaluate_content VARCHAR(500) DEFAULT NULL COMMENT '居民评价内容',
+    urge_count INT NOT NULL DEFAULT 0 COMMENT '催单次数',
+    accepted_time DATETIME DEFAULT NULL COMMENT '受理时间',
+    assigned_time DATETIME DEFAULT NULL COMMENT '分派时间',
+    processing_time DATETIME DEFAULT NULL COMMENT '开始处理时间',
+    finish_time DATETIME DEFAULT NULL COMMENT '提交处理结果时间',
+    confirm_time DATETIME DEFAULT NULL COMMENT '居民确认时间',
+    closed_time DATETIME DEFAULT NULL COMMENT '关闭时间',
+    last_urge_time DATETIME DEFAULT NULL COMMENT '最近催单时间',
+    create_by BIGINT DEFAULT NULL COMMENT '创建人ID',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by BIGINT DEFAULT NULL COMMENT '修改人ID',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除标记：0未删，1已删',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报修工单主表';
+
+CREATE TABLE IF NOT EXISTS biz_repair_order_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    repair_order_id BIGINT NOT NULL COMMENT '报修工单ID',
+    from_status VARCHAR(32) DEFAULT NULL COMMENT '流转前状态',
+    to_status VARCHAR(32) DEFAULT NULL COMMENT '流转后状态',
+    operation_type VARCHAR(32) NOT NULL COMMENT '操作类型：CREATE/ACCEPT/REJECT/ASSIGN/TAKE/PROCESS/SUBMIT/CONFIRM/REOPEN/EVALUATE/URGE/CLOSE',
+    operator_user_id BIGINT NOT NULL COMMENT '操作人用户ID',
+    operation_remark VARCHAR(500) DEFAULT NULL COMMENT '操作说明',
+    operation_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报修工单流转日志表';
+
+CREATE TABLE IF NOT EXISTS biz_repair_attachment (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    repair_order_id BIGINT NOT NULL COMMENT '报修工单ID',
+    file_id BIGINT NOT NULL COMMENT '文件ID',
+    attachment_type VARCHAR(32) NOT NULL COMMENT '附件类型：REPORT/PROCESS/RESULT/FEEDBACK',
+    create_by BIGINT DEFAULT NULL COMMENT '创建人ID',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除标记：0未删，1已删'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报修工单附件表';

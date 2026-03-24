@@ -93,3 +93,19 @@ CREATE INDEX idx_biz_activity_scope_ref ON biz_activity_scope (scope_type, scope
 CREATE UNIQUE INDEX uk_biz_activity_signup_activity_user ON biz_activity_signup (activity_id, user_id);
 CREATE INDEX idx_biz_activity_signup_activity_status ON biz_activity_signup (activity_id, signup_status);
 CREATE INDEX idx_biz_activity_signup_user_status ON biz_activity_signup (user_id, signup_status);
+
+-- biz_repair_order
+CREATE UNIQUE INDEX uk_biz_repair_order_order_no ON biz_repair_order (order_no);
+CREATE INDEX idx_biz_repair_order_status_deleted ON biz_repair_order (status, deleted);
+CREATE INDEX idx_biz_repair_order_complex_status_time ON biz_repair_order (complex_org_id, status, create_time);
+CREATE INDEX idx_biz_repair_order_property_status_time ON biz_repair_order (property_company_org_id, status, create_time);
+CREATE INDEX idx_biz_repair_order_maintainer_status_time ON biz_repair_order (maintainer_user_id, status, create_time);
+CREATE INDEX idx_biz_repair_order_resident_time ON biz_repair_order (resident_user_id, create_time);
+
+-- biz_repair_order_log
+CREATE INDEX idx_biz_repair_order_log_order_time ON biz_repair_order_log (repair_order_id, operation_time);
+CREATE INDEX idx_biz_repair_order_log_operator_time ON biz_repair_order_log (operator_user_id, operation_time);
+
+-- biz_repair_attachment
+CREATE INDEX idx_biz_repair_attachment_order_type ON biz_repair_attachment (repair_order_id, attachment_type);
+CREATE INDEX idx_biz_repair_attachment_file_id ON biz_repair_attachment (file_id);
