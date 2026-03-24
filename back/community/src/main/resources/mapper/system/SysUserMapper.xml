@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.system.mapper.SysUserMapper">
+
+    <resultMap id="SysUserMap" type="xxqqyyy.community.modules.system.entity.SysUser">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="nickname" column="nickname"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="status" column="status"/>
+        <result property="orgId" column="org_id"/>
+        <result property="mustChangePassword" column="must_change_password"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, username, password, nickname, phone, email, status, org_id, must_change_password,
+        create_by, create_time, update_by, update_time, deleted, version
+    </sql>
+
+    <select id="selectById" resultMap="SysUserMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByUsername" resultMap="SysUserMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_user
+        WHERE username = #{username} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="countByUsername" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_user
+        WHERE username = #{username}
+          AND deleted = 0
+          <if test="excludeId != null">
+              AND id != #{excludeId}
+          </if>
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.system.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (
+            username, password, nickname, phone, email, status, org_id, must_change_password,
+            create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{username}, #{password}, #{nickname}, #{phone}, #{email}, #{status}, #{orgId}, #{mustChangePassword},
+            #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+    <update id="update" parameterType="xxqqyyy.community.modules.system.entity.SysUser">
+        UPDATE sys_user
+        SET nickname = #{nickname},
+            phone = #{phone},
+            email = #{email},
+            status = #{status},
+            org_id = #{orgId},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE sys_user
+        SET deleted = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_user
+        SET status = #{status},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updatePassword">
+        UPDATE sys_user
+        SET password = #{password},
+            must_change_password = #{mustChangePassword},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!--
+      用户分页查询：支持关键字、状态、组织过滤，并按数据范围（orgIds）收敛结果。
+      allAccess=true 时不附加组织范围条件。
+    -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_user u
+        WHERE u.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (u.username LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null">
+              AND u.status = #{query.status}
+          </if>
+          <if test="query.orgId != null">
+              AND u.org_id = #{query.orgId}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND u.org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="selectPage" resultMap="SysUserMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_user u
+        WHERE u.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (u.username LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null">
+              AND u.status = #{query.status}
+          </if>
+          <if test="query.orgId != null">
+              AND u.org_id = #{query.orgId}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND u.org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+        ORDER BY u.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+</mapper>
+

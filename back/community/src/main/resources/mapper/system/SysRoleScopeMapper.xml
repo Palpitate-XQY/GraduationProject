@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.system.mapper.SysRoleScopeMapper">
+
+    <resultMap id="SysRoleScopeMap" type="xxqqyyy.community.modules.system.entity.SysRoleScope">
+        <id property="id" column="id"/>
+        <result property="roleId" column="role_id"/>
+        <result property="scopeType" column="scope_type"/>
+        <result property="scopeRefId" column="scope_ref_id"/>
+    </resultMap>
+
+    <delete id="deleteByRoleId">
+        DELETE FROM sys_role_scope
+        WHERE role_id = #{roleId}
+    </delete>
+
+    <insert id="batchInsert">
+        INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id)
+        VALUES
+        <foreach collection="scopes" item="scope" separator=",">
+            (#{scope.roleId}, #{scope.scopeType}, #{scope.scopeRefId})
+        </foreach>
+    </insert>
+
+    <select id="selectByRoleId" resultMap="SysRoleScopeMap">
+        SELECT id, role_id, scope_type, scope_ref_id
+        FROM sys_role_scope
+        WHERE role_id = #{roleId}
+    </select>
+
+    <select id="selectByRoleIds" resultMap="SysRoleScopeMap">
+        SELECT id, role_id, scope_type, scope_ref_id
+        FROM sys_role_scope
+        <if test="roleIds != null and roleIds.size() > 0">
+            WHERE role_id IN
+            <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+                #{roleId}
+            </foreach>
+        </if>
+        <if test="roleIds == null or roleIds.size() == 0">
+            WHERE 1 = 2
+        </if>
+    </select>
+
+</mapper>
+
