@@ -1,6 +1,7 @@
 package xxqqyyy.community.modules.system.service.impl;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,12 @@ import xxqqyyy.community.modules.system.dto.UserPageQuery;
 import xxqqyyy.community.modules.system.dto.UserRoleAssignRequest;
 import xxqqyyy.community.modules.system.dto.UserUpdateRequest;
 import xxqqyyy.community.modules.system.entity.SysUser;
+import xxqqyyy.community.modules.system.entity.SysRole;
+import xxqqyyy.community.modules.system.entity.SysRoleScope;
+import xxqqyyy.community.modules.system.mapper.SysPermissionMapper;
 import xxqqyyy.community.modules.system.mapper.SysRoleMapper;
+import xxqqyyy.community.modules.system.mapper.SysRolePermissionMapper;
+import xxqqyyy.community.modules.system.mapper.SysRoleScopeMapper;
 import xxqqyyy.community.modules.system.mapper.SysUserMapper;
 import xxqqyyy.community.modules.system.mapper.SysUserRoleMapper;
 import xxqqyyy.community.modules.system.model.DataScopeResult;
@@ -44,6 +50,9 @@ public class UserServiceImpl implements UserService {
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
     private final SysRoleMapper sysRoleMapper;
+    private final SysRolePermissionMapper sysRolePermissionMapper;
+    private final SysRoleScopeMapper sysRoleScopeMapper;
+    private final SysPermissionMapper sysPermissionMapper;
     private final SysOrgMapper sysOrgMapper;
     private final DataScopeService dataScopeService;
     private final PasswordEncoder passwordEncoder;
@@ -111,6 +120,7 @@ public class UserServiceImpl implements UserService {
     public void create(UserCreateRequest request) {
         LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
         dataScopeService.assertOrgAccessible(principal.getUserId(), request.getOrgId());
+        validateGrantableRoles(principal, request.getRoleIds());
         if (sysUserMapper.countByUsername(request.getUsername(), null) > 0) {
             throw new BizException(ErrorCode.CONFLICT, "用户名已存在");
         }
@@ -136,6 +146,7 @@ public class UserServiceImpl implements UserService {
         SysUser user = requireUser(request.getId());
         dataScopeService.assertOrgAccessible(principal.getUserId(), user.getOrgId());
         dataScopeService.assertOrgAccessible(principal.getUserId(), request.getOrgId());
+        validateGrantableRoles(principal, request.getRoleIds());
         user.setNickname(request.getNickname());
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
@@ -170,7 +181,37 @@ public class UserServiceImpl implements UserService {
         SysUser user = requireUser(request.getUserId());
         LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
         dataScopeService.assertOrgAccessible(principal.getUserId(), user.getOrgId());
+        validateGrantableRoles(principal, request.getRoleIds());
         assignRolesInternal(request.getUserId(), request.getRoleIds());
+    }
+
+    private void validateGrantableRoles(LoginPrincipal principal, Set<Long> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return;
+        }
+        List<SysRole> targetRoles = sysRoleMapper.selectByIds(roleIds);
+        if (targetRoles.size() != roleIds.size()) {
+            throw new BizException(ErrorCode.BAD_REQUEST, "存在无效角色ID");
+        }
+        boolean hasDisabledRole = targetRoles.stream().anyMatch(role -> role.getStatus() == null || role.getStatus() != 1);
+        if (hasDisabledRole) {
+            throw new BizException(ErrorCode.BAD_REQUEST, "禁止分配已禁用角色");
+        }
+        if (principal.isSuperAdmin()) {
+            return;
+        }
+        Set<Long> permissionIds = new HashSet<>();
+        for (Long roleId : roleIds) {
+            permissionIds.addAll(sysRolePermissionMapper.selectPermissionIdsByRoleId(roleId));
+        }
+        Set<String> targetPermissionCodes = new HashSet<>(sysPermissionMapper.selectCodesByIds(permissionIds));
+        if (!principal.getPermissionCodes().containsAll(targetPermissionCodes)) {
+            throw new BizException(ErrorCode.FORBIDDEN, "分配角色包含越权权限");
+        }
+        List<SysRoleScope> scopes = sysRoleScopeMapper.selectByRoleIds(roleIds);
+        Set<String> scopeTypes = scopes.stream().map(SysRoleScope::getScopeType).collect(Collectors.toSet());
+        Set<Long> scopeRefIds = scopes.stream().map(SysRoleScope::getScopeRefId).collect(Collectors.toSet());
+        dataScopeService.assertRoleScopeGrantable(principal.getUserId(), scopeTypes, scopeRefIds);
     }
 
     private void assignRolesInternal(Long userId, Set<Long> roleIds) {
@@ -200,4 +241,3 @@ public class UserServiceImpl implements UserService {
         return map;
     }
 }
-

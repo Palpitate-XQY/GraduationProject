@@ -1,6 +1,7 @@
 package xxqqyyy.community.modules.system.mapper;
 
 import java.util.List;
+import java.util.Collection;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import xxqqyyy.community.modules.system.entity.SysRole;
@@ -32,6 +33,8 @@ public interface SysRoleMapper {
 
     List<String> selectRoleCodesByUserId(@Param("userId") Long userId);
 
+    List<SysRole> selectByIds(@Param("ids") Collection<Long> ids);
+
     List<SysRole> selectPage(
         @Param("keyword") String keyword,
         @Param("offset") long offset,
@@ -40,4 +43,3 @@ public interface SysRoleMapper {
 
     long countPage(@Param("keyword") String keyword);
 }
-

@@ -100,6 +100,21 @@
           AND r.status = 1
     </select>
 
+    <select id="selectByIds" resultMap="SysRoleMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_role
+        WHERE deleted = 0
+          <if test="ids != null and ids.size() > 0">
+              AND id IN
+              <foreach collection="ids" item="id" open="(" separator="," close=")">
+                  #{id}
+              </foreach>
+          </if>
+          <if test="ids == null or ids.size() == 0">
+              AND 1 = 2
+          </if>
+    </select>
+
     <select id="selectEnabledByUserId" resultMap="SysRoleMap">
         SELECT <include refid="base_columns"/>
         FROM sys_role r
@@ -132,4 +147,3 @@
     </select>
 
 </mapper>
-
