@@ -13,6 +13,7 @@ import xxqqyyy.community.common.api.PageResult;
 import xxqqyyy.community.common.enums.ErrorCode;
 import xxqqyyy.community.common.exception.BizException;
 import xxqqyyy.community.common.util.MarkdownRenderService;
+import xxqqyyy.community.modules.file.service.FileAttachmentService;
 import xxqqyyy.community.modules.file.service.FileBindingService;
 import xxqqyyy.community.modules.notice.dto.NoticeCreateRequest;
 import xxqqyyy.community.modules.notice.dto.NoticePageQuery;
@@ -52,6 +53,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final SysOrgMapper sysOrgMapper;
     private final BizComplexPropertyRelMapper bizComplexPropertyRelMapper;
     private final FileBindingService fileBindingService;
+    private final FileAttachmentService fileAttachmentService;
     private final MarkdownRenderService markdownRenderService;
 
     @Override
@@ -315,6 +317,7 @@ public class NoticeServiceImpl implements NoticeService {
             .contentHtml(markdownRenderService.renderToHtml(notice.getContent()))
             .coverFileId(notice.getCoverFileId())
             .attachmentJson(notice.getAttachmentJson())
+            .attachments(fileAttachmentService.listByAttachmentJson(notice.getAttachmentJson()))
             .status(notice.getStatus())
             .topFlag(notice.getTopFlag())
             .publisherOrgId(notice.getPublisherOrgId())

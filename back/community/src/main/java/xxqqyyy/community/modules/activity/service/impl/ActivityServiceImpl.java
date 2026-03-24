@@ -30,6 +30,7 @@ import xxqqyyy.community.modules.activity.service.ActivityService;
 import xxqqyyy.community.modules.activity.vo.ActivitySignupVO;
 import xxqqyyy.community.modules.activity.vo.ActivityStatsVO;
 import xxqqyyy.community.modules.activity.vo.ActivityVO;
+import xxqqyyy.community.modules.file.service.FileAttachmentService;
 import xxqqyyy.community.modules.file.service.FileBindingService;
 import xxqqyyy.community.modules.org.entity.SysOrg;
 import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
@@ -56,6 +57,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final SysOrgMapper sysOrgMapper;
     private final ActivitySignupLimiter activitySignupLimiter;
     private final FileBindingService fileBindingService;
+    private final FileAttachmentService fileAttachmentService;
     private final MarkdownRenderService markdownRenderService;
 
     @Override
@@ -410,6 +412,7 @@ public class ActivityServiceImpl implements ActivityService {
             .contentHtml(markdownRenderService.renderToHtml(activity.getContent()))
             .coverFileId(activity.getCoverFileId())
             .attachmentJson(activity.getAttachmentJson())
+            .attachments(fileAttachmentService.listByAttachmentJson(activity.getAttachmentJson()))
             .activityStartTime(activity.getActivityStartTime())
             .activityEndTime(activity.getActivityEndTime())
             .signupStartTime(activity.getSignupStartTime())

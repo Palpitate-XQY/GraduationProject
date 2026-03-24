@@ -1,10 +1,12 @@
 package xxqqyyy.community.modules.activity.vo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 import xxqqyyy.community.modules.activity.dto.ActivityScopeItem;
+import xxqqyyy.community.modules.file.vo.FileAttachmentVO;
 
 /**
  * 活动视图对象。
@@ -30,6 +32,11 @@ public class ActivityVO {
     private Long coverFileId;
 
     private String attachmentJson;
+
+    /**
+     * 结构化附件列表（由 attachmentJson 解析得到）。
+     */
+    private List<FileAttachmentVO> attachments;
 
     private LocalDateTime activityStartTime;
 

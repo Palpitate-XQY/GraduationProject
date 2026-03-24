@@ -2,9 +2,11 @@ package xxqqyyy.community.modules.notice.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
+import xxqqyyy.community.modules.file.vo.FileAttachmentVO;
 import xxqqyyy.community.modules.notice.dto.NoticeScopeItem;
 
 /**
@@ -34,6 +36,11 @@ public class NoticeVO {
     private Long coverFileId;
 
     private String attachmentJson;
+
+    /**
+     * 结构化附件列表（由 attachmentJson 解析得到）。
+     */
+    private List<FileAttachmentVO> attachments;
 
     private String status;
 
