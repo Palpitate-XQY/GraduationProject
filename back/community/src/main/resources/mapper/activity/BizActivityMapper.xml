@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.activity.mapper.BizActivityMapper">
+
+    <resultMap id="ActivityMap" type="xxqqyyy.community.modules.activity.entity.BizActivity">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="coverFileId" column="cover_file_id"/>
+        <result property="attachmentJson" column="attachment_json"/>
+        <result property="activityStartTime" column="activity_start_time"/>
+        <result property="activityEndTime" column="activity_end_time"/>
+        <result property="signupStartTime" column="signup_start_time"/>
+        <result property="signupEndTime" column="signup_end_time"/>
+        <result property="location" column="location"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="status" column="status"/>
+        <result property="publisherOrgId" column="publisher_org_id"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, title, content, cover_file_id, attachment_json, activity_start_time, activity_end_time,
+        signup_start_time, signup_end_time, location, max_participants, status, publisher_org_id, publish_time,
+        create_by, create_time, update_by, update_time, deleted, version
+    </sql>
+
+    <select id="selectById" resultMap="ActivityMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_activity
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.activity.entity.BizActivity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_activity (
+            title, content, cover_file_id, attachment_json, activity_start_time, activity_end_time,
+            signup_start_time, signup_end_time, location, max_participants, status, publisher_org_id, publish_time,
+            create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{title}, #{content}, #{coverFileId}, #{attachmentJson}, #{activityStartTime}, #{activityEndTime},
+            #{signupStartTime}, #{signupEndTime}, #{location}, #{maxParticipants}, #{status}, #{publisherOrgId}, #{publishTime},
+            #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+    <update id="update" parameterType="xxqqyyy.community.modules.activity.entity.BizActivity">
+        UPDATE biz_activity
+        SET title = #{title},
+            content = #{content},
+            cover_file_id = #{coverFileId},
+            attachment_json = #{attachmentJson},
+            activity_start_time = #{activityStartTime},
+            activity_end_time = #{activityEndTime},
+            signup_start_time = #{signupStartTime},
+            signup_end_time = #{signupEndTime},
+            location = #{location},
+            max_participants = #{maxParticipants},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE biz_activity
+        SET status = #{status},
+            publish_time = #{publishTime},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE biz_activity
+        SET deleted = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="countManagePage" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_activity a
+        WHERE a.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND a.status = #{query.status}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="selectManagePage" resultMap="ActivityMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_activity a
+        WHERE a.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND a.status = #{query.status}
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+        ORDER BY a.publish_time DESC, a.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countResidentPage" resultType="long">
+        SELECT COUNT(DISTINCT a.id)
+        FROM biz_activity a
+                 INNER JOIN biz_activity_scope s ON a.id = s.activity_id
+        WHERE a.deleted = 0
+          AND a.status = 'PUBLISHED'
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          AND (
+              s.scope_type = 'ALL'
+              OR s.scope_ref_id = #{userOrgId}
+              OR #{ancestorPath} LIKE CONCAT('%/', s.scope_ref_id, '/%')
+          )
+    </select>
+
+    <select id="selectResidentPage" resultMap="ActivityMap">
+        SELECT DISTINCT <include refid="base_columns"/>
+        FROM biz_activity a
+                 INNER JOIN biz_activity_scope s ON a.id = s.activity_id
+        WHERE a.deleted = 0
+          AND a.status = 'PUBLISHED'
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          AND (
+              s.scope_type = 'ALL'
+              OR s.scope_ref_id = #{userOrgId}
+              OR #{ancestorPath} LIKE CONCAT('%/', s.scope_ref_id, '/%')
+          )
+        ORDER BY a.publish_time DESC, a.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+</mapper>
+
