@@ -462,3 +462,48 @@ ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
 INSERT INTO sys_role_permission (role_id, permission_id)
 SELECT 1, id FROM sys_permission WHERE deleted = 0
 ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+
+-- ========== 居民档案 / 字典 / 看板权限补充 ==========
+INSERT INTO sys_permission (id, permission_code, permission_name, permission_type, parent_id, path, method, sort, create_by, update_by, deleted, version)
+VALUES
+    (1901, 'resident:profile:my:view', '居民查看本人档案', 'API', NULL, '/api/resident/profiles/me', 'GET', 111, 1, 1, 0, 0),
+    (1902, 'resident:profile:my:update', '居民更新本人档案', 'API', NULL, '/api/resident/profiles/me', 'PUT', 112, 1, 1, 0, 0),
+    (1903, 'resident:profile:view', '管理端查看居民档案', 'API', NULL, '/api/resident/profiles/{userId}', 'GET', 113, 1, 1, 0, 0),
+    (1904, 'resident:profile:update', '管理端维护居民档案', 'API', NULL, '/api/resident/profiles', 'PUT', 114, 1, 1, 0, 0),
+    (1911, 'sys:dict:type:list', '字典类型列表', 'API', NULL, '/api/system/dicts/types', 'GET', 121, 1, 1, 0, 0),
+    (1912, 'sys:dict:type:view', '字典类型详情', 'API', NULL, '/api/system/dicts/types/{id}', 'GET', 122, 1, 1, 0, 0),
+    (1913, 'sys:dict:type:create', '新增字典类型', 'API', NULL, '/api/system/dicts/types', 'POST', 123, 1, 1, 0, 0),
+    (1914, 'sys:dict:type:update', '更新字典类型', 'API', NULL, '/api/system/dicts/types', 'PUT', 124, 1, 1, 0, 0),
+    (1915, 'sys:dict:type:delete', '删除字典类型', 'API', NULL, '/api/system/dicts/types/{id}', 'DELETE', 125, 1, 1, 0, 0),
+    (1921, 'sys:dict:data:list', '字典数据列表', 'API', NULL, '/api/system/dicts/data', 'GET', 131, 1, 1, 0, 0),
+    (1922, 'sys:dict:data:view', '字典数据详情', 'API', NULL, '/api/system/dicts/data/{id}', 'GET', 132, 1, 1, 0, 0),
+    (1923, 'sys:dict:data:create', '新增字典数据', 'API', NULL, '/api/system/dicts/data', 'POST', 133, 1, 1, 0, 0),
+    (1924, 'sys:dict:data:update', '更新字典数据', 'API', NULL, '/api/system/dicts/data', 'PUT', 134, 1, 1, 0, 0),
+    (1925, 'sys:dict:data:delete', '删除字典数据', 'API', NULL, '/api/system/dicts/data/{id}', 'DELETE', 135, 1, 1, 0, 0),
+    (1926, 'sys:dict:option:list', '字典选项查询', 'API', NULL, '/api/system/dicts/options/{dictCode}', 'GET', 136, 1, 1, 0, 0),
+    (1931, 'dashboard:view', '查看首页看板', 'API', NULL, '/api/system/dashboard/overview', 'GET', 141, 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    permission_name = VALUES(permission_name),
+    permission_type = VALUES(permission_type),
+    parent_id = VALUES(parent_id),
+    path = VALUES(path),
+    method = VALUES(method),
+    sort = VALUES(sort),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+VALUES
+    (2, 1903), (2, 1904), (2, 1911), (2, 1912), (2, 1913), (2, 1914), (2, 1915),
+    (2, 1921), (2, 1922), (2, 1923), (2, 1924), (2, 1925), (2, 1926), (2, 1931),
+    (3, 1903), (3, 1904), (3, 1911), (3, 1912), (3, 1913), (3, 1914), (3, 1915),
+    (3, 1921), (3, 1922), (3, 1923), (3, 1924), (3, 1925), (3, 1926), (3, 1931),
+    (4, 1903), (4, 1904), (4, 1911), (4, 1912), (4, 1913), (4, 1914), (4, 1915),
+    (4, 1921), (4, 1922), (4, 1923), (4, 1924), (4, 1925), (4, 1926), (4, 1931),
+    (5, 1901), (5, 1902), (5, 1926), (5, 1931)
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+SELECT 1, id FROM sys_permission WHERE deleted = 0
+ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);

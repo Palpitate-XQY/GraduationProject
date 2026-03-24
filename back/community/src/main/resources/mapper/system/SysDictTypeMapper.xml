@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.system.mapper.SysDictTypeMapper">
+
+    <resultMap id="DictTypeMap" type="xxqqyyy.community.modules.system.entity.SysDictType">
+        <id property="id" column="id"/>
+        <result property="dictCode" column="dict_code"/>
+        <result property="dictName" column="dict_name"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, dict_code, dict_name, status, create_by, create_time, update_by, update_time, deleted, version
+    </sql>
+
+    <select id="selectById" resultMap="DictTypeMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_dict_type
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <select id="selectByCode" resultMap="DictTypeMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_dict_type
+        WHERE dict_code = #{dictCode}
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="countByCode" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_dict_type
+        WHERE dict_code = #{dictCode}
+          AND deleted = 0
+          <if test="excludeId != null">
+              AND id != #{excludeId}
+          </if>
+    </select>
+
+    <insert id="insert" parameterType="xxqqyyy.community.modules.system.entity.SysDictType" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_dict_type (
+            dict_code, dict_name, status, create_by, create_time, update_by, update_time, deleted, version
+        ) VALUES (
+            #{dictCode}, #{dictName}, #{status}, #{createBy}, NOW(), #{updateBy}, NOW(), 0, 0
+        )
+    </insert>
+
+    <update id="update" parameterType="xxqqyyy.community.modules.system.entity.SysDictType">
+        UPDATE sys_dict_type
+        SET dict_code = #{dictCode},
+            dict_name = #{dictName},
+            status = #{status},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE sys_dict_type
+        SET deleted = 1,
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_dict_type d
+        WHERE d.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (d.dict_code LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR d.dict_name LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null">
+              AND d.status = #{query.status}
+          </if>
+    </select>
+
+    <select id="selectPage" resultMap="DictTypeMap">
+        SELECT <include refid="base_columns"/>
+        FROM sys_dict_type d
+        WHERE d.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND (d.dict_code LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR d.dict_name LIKE CONCAT('%', #{query.keyword}, '%'))
+          </if>
+          <if test="query.status != null">
+              AND d.status = #{query.status}
+          </if>
+        ORDER BY d.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+</mapper>

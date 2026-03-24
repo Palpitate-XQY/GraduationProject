@@ -181,4 +181,24 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <select id="countPublished" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_activity a
+        WHERE a.deleted = 0
+          AND a.status = 'PUBLISHED'
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
 </mapper>

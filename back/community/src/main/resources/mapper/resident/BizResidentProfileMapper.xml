@@ -39,4 +39,17 @@
         )
     </insert>
 
+    <update id="updateByUserId" parameterType="xxqqyyy.community.modules.resident.entity.BizResidentProfile">
+        UPDATE biz_resident_profile
+        SET community_org_id = #{communityOrgId},
+            complex_org_id = #{complexOrgId},
+            room_no = #{roomNo},
+            emergency_contact = #{emergencyContact},
+            emergency_phone = #{emergencyPhone},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND deleted = 0
+    </update>
+
 </mapper>

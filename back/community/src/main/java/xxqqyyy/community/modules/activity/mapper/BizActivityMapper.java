@@ -59,5 +59,9 @@ public interface BizActivityMapper {
         @Param("offset") long offset,
         @Param("size") long size
     );
-}
 
+    long countPublished(
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+}

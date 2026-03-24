@@ -244,4 +244,55 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <select id="countByStatusInScope" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          <if test="statusList != null and statusList.size() > 0">
+              AND o.status IN
+              <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                  #{status}
+              </foreach>
+          </if>
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="countByMaintainerAndStatus" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.maintainer_user_id = #{maintainerUserId}
+          <if test="statusList != null and statusList.size() > 0">
+              AND o.status IN
+              <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                  #{status}
+              </foreach>
+          </if>
+    </select>
+
+    <select id="countByResidentAndStatus" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.resident_user_id = #{residentUserId}
+          <if test="statusList != null and statusList.size() > 0">
+              AND o.status IN
+              <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                  #{status}
+              </foreach>
+          </if>
+    </select>
+
 </mapper>

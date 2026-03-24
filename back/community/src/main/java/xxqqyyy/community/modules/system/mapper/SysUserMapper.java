@@ -37,6 +37,12 @@ public interface SysUserMapper {
         @Param("updateBy") Long updateBy
     );
 
+    int updateOrgId(
+        @Param("id") Long id,
+        @Param("orgId") Long orgId,
+        @Param("updateBy") Long updateBy
+    );
+
     long countPage(
         @Param("query") UserPageQuery query,
         @Param("allAccess") boolean allAccess,
@@ -50,5 +56,9 @@ public interface SysUserMapper {
         @Param("offset") long offset,
         @Param("size") long size
     );
-}
 
+    long countByScope(
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+}

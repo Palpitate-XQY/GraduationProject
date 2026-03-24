@@ -101,6 +101,15 @@
           AND deleted = 0
     </update>
 
+    <update id="updateOrgId">
+        UPDATE sys_user
+        SET org_id = #{orgId},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
     <!--
       用户分页查询：支持关键字、状态、组织过滤，并按数据范围（orgIds）收敛结果。
       allAccess=true 时不附加组织范围条件。
@@ -165,5 +174,23 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-</mapper>
+    <select id="countByScope" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_user u
+        WHERE u.deleted = 0
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND u.org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
 
+</mapper>

@@ -44,4 +44,20 @@ public interface BizRepairOrderMapper {
         @Param("offset") long offset,
         @Param("size") long size
     );
+
+    long countByStatusInScope(
+        @Param("statusList") Collection<String> statusList,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    long countByMaintainerAndStatus(
+        @Param("maintainerUserId") Long maintainerUserId,
+        @Param("statusList") Collection<String> statusList
+    );
+
+    long countByResidentAndStatus(
+        @Param("residentUserId") Long residentUserId,
+        @Param("statusList") Collection<String> statusList
+    );
 }
