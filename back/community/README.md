@@ -8,6 +8,7 @@
 - 组织模型与小区-物业服务关系
 - 公告、活动、报修核心业务
 - 登录日志与操作日志查询
+- 居民注册与忘记密码（验证码重置）
 
 ## 2. 技术栈
 - JDK 17
@@ -68,7 +69,17 @@ mvn clean spring-boot:run
 - 初始密码：`Admin@123456`
 - 首登改密：`must_change_password=1`
 
-## 8. 测试
+## 8. 居民示例账号
+- 用户名：`resident_demo`
+- 初始密码：`Admin@123456`
+- 角色：`RESIDENT`
+
+## 9. 认证接口补充
+- `POST /api/auth/resident/register`
+- `POST /api/auth/password/reset-code`
+- `POST /api/auth/password/reset-by-code`
+
+## 10. 测试
 ```bash
 mvn test
 ```
