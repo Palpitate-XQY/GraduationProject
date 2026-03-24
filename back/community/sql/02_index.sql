@@ -68,3 +68,28 @@ CREATE INDEX idx_log_operation_user_id ON log_operation (user_id);
 CREATE INDEX idx_log_operation_module_time ON log_operation (operation_module, operation_time);
 CREATE INDEX idx_log_operation_trace_id ON log_operation (trace_id);
 
+-- biz_notice
+CREATE INDEX idx_biz_notice_type_status_deleted ON biz_notice (notice_type, status, deleted);
+CREATE INDEX idx_biz_notice_publisher_org_id ON biz_notice (publisher_org_id);
+CREATE INDEX idx_biz_notice_publish_time ON biz_notice (publish_time);
+CREATE INDEX idx_biz_notice_top_flag_publish_time ON biz_notice (top_flag, publish_time);
+
+-- biz_notice_scope
+CREATE INDEX idx_biz_notice_scope_notice_id ON biz_notice_scope (notice_id);
+CREATE INDEX idx_biz_notice_scope_ref ON biz_notice_scope (scope_type, scope_ref_id);
+
+-- biz_activity
+CREATE INDEX idx_biz_activity_status_deleted ON biz_activity (status, deleted);
+CREATE INDEX idx_biz_activity_publisher_org_id ON biz_activity (publisher_org_id);
+CREATE INDEX idx_biz_activity_time ON biz_activity (activity_start_time, activity_end_time);
+CREATE INDEX idx_biz_activity_signup_time ON biz_activity (signup_start_time, signup_end_time);
+CREATE INDEX idx_biz_activity_publish_time ON biz_activity (publish_time);
+
+-- biz_activity_scope
+CREATE INDEX idx_biz_activity_scope_activity_id ON biz_activity_scope (activity_id);
+CREATE INDEX idx_biz_activity_scope_ref ON biz_activity_scope (scope_type, scope_ref_id);
+
+-- biz_activity_signup
+CREATE UNIQUE INDEX uk_biz_activity_signup_activity_user ON biz_activity_signup (activity_id, user_id);
+CREATE INDEX idx_biz_activity_signup_activity_status ON biz_activity_signup (activity_id, signup_status);
+CREATE INDEX idx_biz_activity_signup_user_status ON biz_activity_signup (user_id, signup_status);
