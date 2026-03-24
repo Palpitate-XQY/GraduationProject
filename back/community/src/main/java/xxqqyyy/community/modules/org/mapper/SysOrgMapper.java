@@ -32,10 +32,11 @@ public interface SysOrgMapper {
 
     List<Long> selectDescendantIds(@Param("rootId") Long rootId);
 
+    List<Long> selectIdsByTypeInIds(@Param("orgType") String orgType, @Param("ids") Collection<Long> ids);
+
     List<SysOrg> selectTree(
         @Param("query") OrgQuery query,
         @Param("allAccess") boolean allAccess,
         @Param("orgIds") Collection<Long> orgIds
     );
 }
-
