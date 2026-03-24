@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.log.mapper.LogLoginMapper">
+
+    <!-- 登录日志插入SQL -->
+    <insert id="insert" parameterType="xxqqyyy.community.modules.log.entity.LogLogin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO log_login (
+            user_id,
+            username,
+            success_flag,
+            message,
+            ip,
+            user_agent,
+            login_time
+        ) VALUES (
+            #{userId},
+            #{username},
+            #{successFlag},
+            #{message},
+            #{ip},
+            #{userAgent},
+            #{loginTime}
+        )
+    </insert>
+
+</mapper>
