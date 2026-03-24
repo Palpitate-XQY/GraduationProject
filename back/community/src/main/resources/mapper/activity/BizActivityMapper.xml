@@ -33,6 +33,12 @@
         create_by, create_time, update_by, update_time, deleted, version
     </sql>
 
+    <sql id="base_columns_with_alias">
+        a.id, a.title, a.content, a.cover_file_id, a.attachment_json, a.activity_start_time, a.activity_end_time,
+        a.signup_start_time, a.signup_end_time, a.location, a.max_participants, a.status, a.publisher_org_id, a.publish_time,
+        a.create_by, a.create_time, a.update_by, a.update_time, a.deleted, a.version
+    </sql>
+
     <select id="selectById" resultMap="ActivityMap">
         SELECT <include refid="base_columns"/>
         FROM biz_activity
@@ -158,7 +164,7 @@
     </select>
 
     <select id="selectResidentPage" resultMap="ActivityMap">
-        SELECT DISTINCT <include refid="base_columns"/>
+        SELECT DISTINCT <include refid="base_columns_with_alias"/>
         FROM biz_activity a
                  INNER JOIN biz_activity_scope s ON a.id = s.activity_id
         WHERE a.deleted = 0
@@ -176,4 +182,3 @@
     </select>
 
 </mapper>
-

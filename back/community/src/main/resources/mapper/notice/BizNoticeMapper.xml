@@ -28,6 +28,11 @@
         publisher_org_id, publish_time, create_by, create_time, update_by, update_time, deleted, version
     </sql>
 
+    <sql id="base_columns_with_alias">
+        n.id, n.notice_type, n.title, n.content, n.cover_file_id, n.attachment_json, n.status, n.top_flag,
+        n.publisher_org_id, n.publish_time, n.create_by, n.create_time, n.update_by, n.update_time, n.deleted, n.version
+    </sql>
+
     <select id="selectById" resultMap="NoticeMap">
         SELECT <include refid="base_columns"/>
         FROM biz_notice
@@ -157,7 +162,7 @@
     </select>
 
     <select id="selectResidentPage" resultMap="NoticeMap">
-        SELECT DISTINCT <include refid="base_columns"/>
+        SELECT DISTINCT <include refid="base_columns_with_alias"/>
         FROM biz_notice n
                  INNER JOIN biz_notice_scope ns ON n.id = ns.notice_id
         WHERE n.deleted = 0
@@ -178,4 +183,3 @@
     </select>
 
 </mapper>
-
