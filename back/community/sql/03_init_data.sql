@@ -25,7 +25,8 @@ VALUES
     (1, 'SUPER_ADMIN', '超级管理员', 1, NULL, 1, 1, '系统最高权限角色', 1, 1, 0, 0),
     (2, 'STREET_ADMIN', '街道管理员', 1, 1, 1, 2, '街道层级管理角色', 1, 1, 0, 0),
     (3, 'COMMUNITY_ADMIN', '社区管理员', 1, 2, 1, 3, '社区层级管理角色', 1, 1, 0, 0),
-    (4, 'PROPERTY_ADMIN', '物业管理员', 1, 2, 1, 4, '物业公司管理角色', 1, 1, 0, 0)
+    (4, 'PROPERTY_ADMIN', '物业管理员', 1, 2, 1, 4, '物业公司管理角色', 1, 1, 0, 0),
+    (5, 'RESIDENT', '居民用户', 1, NULL, 0, 99, '居民端默认角色', 1, 1, 0, 0)
 ON DUPLICATE KEY UPDATE
     role_name = VALUES(role_name),
     status = VALUES(status),
@@ -111,9 +112,28 @@ ON DUPLICATE KEY UPDATE
     update_by = 1,
     update_time = NOW();
 
+-- ========== 居民示例账号（默认密码：Admin@123456） ==========
+INSERT INTO sys_user (id, username, password, nickname, phone, email, status, org_id, must_change_password, create_by, update_by, deleted, version)
+VALUES
+    (2, 'resident_demo', '$2b$12$y7U3AmqkqckZck4tFE31Ye.FnEia77IqShzAEzutD3OgmWPJege9y', '居民演示账号', '13900000000', 'resident@community.local', 1, 3, 0, 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    password = VALUES(password),
+    nickname = VALUES(nickname),
+    phone = VALUES(phone),
+    email = VALUES(email),
+    status = VALUES(status),
+    org_id = VALUES(org_id),
+    must_change_password = VALUES(must_change_password),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
 -- ========== 角色权限、用户角色 ==========
 DELETE FROM sys_user_role WHERE user_id = 1;
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
+
+DELETE FROM sys_user_role WHERE user_id = 2;
+INSERT INTO sys_user_role (user_id, role_id) VALUES (2, 5);
 
 DELETE FROM sys_role_permission WHERE role_id = 1;
 INSERT INTO sys_role_permission (role_id, permission_id)
@@ -145,18 +165,43 @@ VALUES
     (4, 1401), (4, 1402), (4, 1403), (4, 1404), (4, 1406), (4, 1407), (4, 1408), (4, 1409),
     (4, 1501), (4, 1502), (4, 1503), (4, 1504), (4, 1506), (4, 1507), (4, 1508), (4, 1509), (4, 1511), (4, 1512);
 
+DELETE FROM sys_role_permission WHERE role_id = 5;
+INSERT INTO sys_role_permission (role_id, permission_id)
+VALUES
+    (5, 1408), (5, 1409),
+    (5, 1508), (5, 1509), (5, 1510),
+    (5, 1601), (5, 1602), (5, 1603), (5, 1612), (5, 1613), (5, 1614), (5, 1615), (5, 1616);
+
 -- ========== 数据范围 ==========
-DELETE FROM sys_role_scope WHERE role_id IN (1, 2, 3, 4);
+DELETE FROM sys_role_scope WHERE role_id IN (1, 2, 3, 4, 5);
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (1, 'ALL', NULL);
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (2, 'STREET', 1);
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (3, 'COMMUNITY', 2);
 INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (4, 'PROPERTY_COMPANY', 4);
+INSERT INTO sys_role_scope (role_id, scope_type, scope_ref_id) VALUES (5, 'SELF', NULL);
 
 -- ========== 小区物业关系 ==========
 INSERT INTO biz_complex_property_rel (id, complex_org_id, property_company_org_id, status, create_by, update_by, deleted, version)
 VALUES (1, 3, 4, 1, 1, 1, 0, 0)
 ON DUPLICATE KEY UPDATE
     status = VALUES(status),
+    deleted = 0,
+    update_by = 1,
+    update_time = NOW();
+
+-- ========== 居民档案示例数据 ==========
+INSERT INTO biz_resident_profile (
+    id, user_id, community_org_id, complex_org_id, room_no, emergency_contact, emergency_phone,
+    create_by, update_by, deleted, version
+)
+VALUES
+    (1, 2, 2, 3, '1栋1单元101', '张三', '13900000001', 1, 1, 0, 0)
+ON DUPLICATE KEY UPDATE
+    community_org_id = VALUES(community_org_id),
+    complex_org_id = VALUES(complex_org_id),
+    room_no = VALUES(room_no),
+    emergency_contact = VALUES(emergency_contact),
+    emergency_phone = VALUES(emergency_phone),
     deleted = 0,
     update_by = 1,
     update_time = NOW();

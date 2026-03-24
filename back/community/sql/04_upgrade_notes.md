@@ -14,6 +14,7 @@
 - 新增日志查询权限：`log:login:list`、`log:operation:list`。
 - 新增日志查询索引：`idx_log_login_ip_time`、`idx_log_operation_success_time`。
 - 初始化脚本增加超级管理员权限兜底同步，避免增量权限漏授。
+- 初始化脚本补充居民角色 `RESIDENT`、居民示例账号与居民档案样例，支持居民端全流程联调。
 
 ## 升级约束
 - 升级脚本仍保持手工执行，不强依赖 Flyway/Liquibase。
