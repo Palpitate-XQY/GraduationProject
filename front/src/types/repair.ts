@@ -67,8 +67,8 @@ export interface RepairOrderVO {
 export interface RepairAttachmentVO {
   id: number
   fileId: number
-  fileName: string
-  fileUrl: string
+  attachmentType: string
+  createTime: string
 }
 
 /** 报修查询 */
@@ -87,5 +87,21 @@ export interface RepairCreateRequest {
   repairAddress: string
   emergencyLevel: string
   expectHandleTime?: string
+  complexOrgId: number
+  propertyCompanyOrgId?: number
   attachmentFileIds?: number[]
+}
+
+export interface RepairReopenRequest {
+  feedback: string
+  attachmentFileIds?: number[]
+}
+
+export interface RepairEvaluateRequest {
+  score: number
+  content?: string
+}
+
+export interface RepairUrgeRequest {
+  content: string
 }

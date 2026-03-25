@@ -24,8 +24,8 @@ export interface ActivityVO {
 }
 
 export interface ActivityScopeItem {
-  orgId: number
-  orgName?: string
+  scopeType: string
+  scopeRefId: number
 }
 
 export interface ActivityPageQuery {

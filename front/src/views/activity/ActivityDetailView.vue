@@ -136,7 +136,7 @@ onMounted(loadData)
         <div v-if="activity.attachments?.length" class="mt-8 pt-6 border-t border-white/10">
           <h4 class="text-white/60 text-xs font-body uppercase tracking-wider mb-3">附件</h4>
           <div class="space-y-2">
-            <a v-for="att in activity.attachments" :key="att.fileId" :href="att.fileUrl" target="_blank"
+            <a v-for="att in activity.attachments" :key="att.fileId" :href="att.accessUrl" target="_blank"
                class="flex items-center gap-2 text-white/70 text-sm font-body hover:text-white transition-colors">
               <Paperclip :size="14" /> {{ att.fileName }}
             </a>

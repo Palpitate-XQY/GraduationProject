@@ -87,7 +87,7 @@ async function handleUrge() {
   if (!order.value) return
   actionLoading.value = true
   try {
-    await urgeRepair(order.value.id)
+    await urgeRepair(order.value.id, { content: '请协助尽快处理当前报修工单。' })
     ElMessage.success('催单成功')
     await loadData()
   } catch { /* handled */ } finally { actionLoading.value = false }
@@ -101,7 +101,7 @@ async function handleReopen() {
     })
     if (!value?.trim()) return
     actionLoading.value = true
-    await reopenRepair(order.value.id, { reason: value })
+    await reopenRepair(order.value.id, { feedback: value })
     ElMessage.success('已反馈，工单将重新处理')
     await loadData()
   } catch { /* cancelled or handled */ } finally { actionLoading.value = false }
@@ -114,7 +114,7 @@ async function handleEvaluate() {
       confirmButtonText: '提交', cancelButtonText: '取消',
     })
     actionLoading.value = true
-    await evaluateRepair(order.value.id, { evaluateScore: 5, evaluateContent: value || '' })
+    await evaluateRepair(order.value.id, { score: 5, content: value || '' })
     ElMessage.success('评价成功，感谢反馈')
     await loadData()
   } catch { /* cancelled or handled */ } finally { actionLoading.value = false }

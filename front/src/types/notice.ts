@@ -20,15 +20,18 @@ export interface NoticeVO {
 }
 
 export interface NoticeScopeItem {
-  orgId: number
-  orgName?: string
+  scopeType: string
+  scopeRefId: number
 }
 
 export interface FileAttachmentVO {
   fileId: number
+  originFileName: string
   fileName: string
-  fileUrl: string
   fileSize: number
+  contentType: string
+  storageType: string
+  accessUrl: string
 }
 
 export interface NoticePageQuery {

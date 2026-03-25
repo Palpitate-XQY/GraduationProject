@@ -88,7 +88,7 @@ onMounted(async () => {
             <a
               v-for="att in notice.attachments"
               :key="att.fileId"
-              :href="att.fileUrl"
+              :href="att.accessUrl"
               target="_blank"
               class="flex items-center gap-2 text-white/70 text-sm font-body
                      hover:text-white transition-colors"

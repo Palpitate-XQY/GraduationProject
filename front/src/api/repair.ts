@@ -4,7 +4,14 @@
  */
 import request from '@/utils/request'
 import type { ApiResponse, PageResult } from '@/types/common'
-import type { RepairOrderVO, RepairPageQuery, RepairCreateRequest } from '@/types/repair'
+import type {
+  RepairOrderVO,
+  RepairPageQuery,
+  RepairCreateRequest,
+  RepairUrgeRequest,
+  RepairReopenRequest,
+  RepairEvaluateRequest,
+} from '@/types/repair'
 
 /** 创建报修 */
 export const createRepair = (data: RepairCreateRequest) =>
@@ -31,13 +38,13 @@ export const confirmRepair = (id: number) =>
   request.post<any, ApiResponse<void>>(`/api/repairs/${id}/confirm`)
 
 /** 居民催单 */
-export const urgeRepair = (id: number, data?: { reason?: string }) =>
-  request.post<any, ApiResponse<void>>(`/api/repairs/${id}/urge`, data || {})
+export const urgeRepair = (id: number, data: RepairUrgeRequest) =>
+  request.post<any, ApiResponse<void>>(`/api/repairs/${id}/urge`, data)
 
 /** 居民反馈未解决 */
-export const reopenRepair = (id: number, data: { reason: string }) =>
+export const reopenRepair = (id: number, data: RepairReopenRequest) =>
   request.post<any, ApiResponse<void>>(`/api/repairs/${id}/reopen`, data)
 
 /** 居民评价 */
-export const evaluateRepair = (id: number, data: { evaluateScore: number; evaluateContent?: string }) =>
+export const evaluateRepair = (id: number, data: RepairEvaluateRequest) =>
   request.post<any, ApiResponse<void>>(`/api/repairs/${id}/evaluate`, data)

@@ -36,12 +36,12 @@ function formatDate(d: string | null) {
 }
 
 function statusLabel(s: string) {
-  const m: Record<string, string> = { DRAFT: '草稿', PUBLISHED: '已发布', RECALLED: '已撤回', ENDED: '已结束' }
+  const m: Record<string, string> = { DRAFT: '草稿', PUBLISHED: '已发布', RECALLED: '已撤回', FINISHED: '已结束' }
   return m[s] || s
 }
 
 function statusColor(s: string) {
-  const m: Record<string, string> = { DRAFT: 'bg-gray-500/20 text-gray-300', PUBLISHED: 'bg-emerald-500/20 text-emerald-300', RECALLED: 'bg-amber-500/20 text-amber-300', ENDED: 'bg-white/10 text-white/50' }
+  const m: Record<string, string> = { DRAFT: 'bg-gray-500/20 text-gray-300', PUBLISHED: 'bg-emerald-500/20 text-emerald-300', RECALLED: 'bg-amber-500/20 text-amber-300', FINISHED: 'bg-white/10 text-white/50' }
   return m[s] || 'bg-white/10 text-white/60'
 }
 
