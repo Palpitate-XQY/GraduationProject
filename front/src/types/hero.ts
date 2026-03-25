@@ -1,15 +1,16 @@
 /**
- * Hero 区域类型定义
+ * Hero 区域与导航类型定义
  */
 
-/** 导航项 */
 export interface NavItem {
   label: string
   href: string
   icon?: string
+  permissionCode?: string
+  requiresAuth?: boolean
+  publicFallback?: boolean
 }
 
-/** CTA 按钮 */
 export interface CtaButton {
   text: string
   href: string
@@ -17,7 +18,6 @@ export interface CtaButton {
   icon?: string
 }
 
-/** 快捷入口 */
 export interface QuickEntry {
   label: string
   icon: string
@@ -25,12 +25,10 @@ export interface QuickEntry {
   description?: string
 }
 
-/** 合作伙伴 / 能力标签 */
 export interface PartnerItem {
   name: string
 }
 
-/** Hero 区域完整数据 */
 export interface HeroContent {
   title: string
   subtitle: string

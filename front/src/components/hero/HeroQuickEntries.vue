@@ -1,13 +1,11 @@
 <script setup lang="ts">
 /**
- * HeroQuickEntries — 快捷业务入口
- * 映射后端核心居民端功能
- * 使用 liquid-glass 胶囊卡片，保持首屏电影感
+ * HeroQuickEntries - 首屏业务快捷入口
  */
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
-import { Megaphone, CalendarHeart, Wrench, UserCircle } from 'lucide-vue-next'
+import { CalendarHeart, Megaphone, UserCircle, Wrench } from 'lucide-vue-next'
 import type { QuickEntry } from '@/types/hero'
 
 defineProps<{
@@ -25,47 +23,42 @@ const iconMap: Record<string, any> = {
 }
 
 onMounted(() => {
-  if (listRef.value) {
-    const items = listRef.value.querySelectorAll('.quick-entry-item')
-    gsap.fromTo(
-      items,
-      { opacity: 0, y: 30, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.12,
-        delay: 1.5,
-        ease: 'power2.out',
-      },
-    )
-  }
+  if (!listRef.value) return
+  const items = listRef.value.querySelectorAll('.quick-entry-item')
+  gsap.fromTo(
+    items,
+    { opacity: 0, y: 20, filter: 'blur(6px)' },
+    {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      duration: 0.5,
+      stagger: 0.08,
+      delay: 1.4,
+      ease: 'power2.out',
+    },
+  )
 })
 </script>
 
 <template>
   <div
+    v-if="entries.length"
     ref="listRef"
-    class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10 max-w-2xl"
+    class="mt-8 flex flex-wrap gap-3 max-w-3xl"
   >
-    <div
+    <button
       v-for="entry in entries"
       :key="entry.label"
-      class="quick-entry-item liquid-glass rounded-2xl p-4 cursor-pointer
-             hover:bg-white/5 transition-all duration-300 hover:scale-105 group"
+      type="button"
+      class="quick-entry-item liquid-glass rounded-full px-4 py-2 text-left text-white/90 hover:text-white hover:bg-white/8 transition-all duration-300"
       :style="{ opacity: 0 }"
       @click="router.push(entry.href)"
     >
-      <component
-        :is="iconMap[entry.icon]"
-        :size="24"
-        class="text-white/70 group-hover:text-white transition-colors mb-2"
-      />
-      <p class="text-white text-sm font-body font-medium">{{ entry.label }}</p>
-      <p class="text-white/50 text-xs font-body mt-1 leading-relaxed">
-        {{ entry.description }}
-      </p>
-    </div>
+      <span class="flex items-center gap-2 text-xs md:text-sm font-body font-medium">
+        <component :is="iconMap[entry.icon]" :size="16" />
+        {{ entry.label }}
+      </span>
+    </button>
   </div>
 </template>

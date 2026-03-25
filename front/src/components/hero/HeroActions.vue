@@ -1,11 +1,8 @@
 <script setup lang="ts">
 /**
- * HeroActions — CTA 按钮组
- * 主按钮: liquid-glass-strong 胶囊风格
- * 次按钮: 轻量文字按钮
- * 按钮语义对应后端模块入口
+ * HeroActions - 首屏 CTA 按钮组
  */
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 import { ArrowUpRight, Play } from 'lucide-vue-next'
@@ -13,29 +10,27 @@ import type { CtaButton } from '@/types/hero'
 
 defineProps<{
   ctas: CtaButton[]
-  delay?: number
 }>()
 
 const router = useRouter()
 const containerRef = ref<HTMLElement | null>(null)
 
-onMounted(() => {
-  if (containerRef.value) {
-    gsap.fromTo(
-      containerRef.value,
-      { opacity: 0, y: 20, filter: 'blur(8px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, delay: 1.1, ease: 'power2.out' },
-    )
-  }
-})
-
-function handleClick(href: string) {
+function navigate(href: string) {
   if (href.startsWith('#')) {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
-  } else {
-    router.push(href)
+    return
   }
+  router.push(href)
 }
+
+onMounted(() => {
+  if (!containerRef.value) return
+  gsap.fromTo(
+    containerRef.value,
+    { opacity: 0, y: 20, filter: 'blur(8px)' },
+    { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, delay: 1.1, ease: 'power2.out' },
+  )
+})
 </script>
 
 <template>
@@ -45,18 +40,19 @@ function handleClick(href: string) {
     :style="{ opacity: 0 }"
   >
     <button
-      v-for="(cta, i) in ctas"
-      :key="i"
+      v-for="(cta, index) in ctas"
+      :key="`${cta.href}-${index}`"
+      type="button"
       :class="[
-        'flex items-center gap-2 font-body text-sm font-medium transition-all duration-300 cursor-pointer select-none',
+        'flex items-center gap-2 font-body text-sm transition-all duration-300 cursor-pointer',
         cta.primary
-          ? 'liquid-glass-strong rounded-full px-6 py-3 text-white hover:scale-105 hover:shadow-lg hover:shadow-white/5'
-          : 'text-white/80 hover:text-white px-2 py-2',
+          ? 'liquid-glass-strong rounded-full px-5 py-2.5 text-foreground font-medium hover:scale-105'
+          : 'px-1 py-2 text-white/80 hover:text-white',
       ]"
-      @click="handleClick(cta.href)"
+      @click="navigate(cta.href)"
     >
-      <ArrowUpRight v-if="cta.icon === 'ArrowUpRight'" :size="18" />
-      <Play v-if="cta.icon === 'Play'" :size="18" />
+      <ArrowUpRight v-if="cta.icon === 'ArrowUpRight'" :size="16" />
+      <Play v-if="cta.icon === 'Play'" :size="16" />
       {{ cta.text }}
     </button>
   </div>

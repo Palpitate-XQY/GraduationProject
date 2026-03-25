@@ -1,104 +1,98 @@
 <script setup lang="ts">
 /**
- * HeroNavbar — 全屏悬浮导航栏
- * 悬浮在视频之上，透明+液态玻璃质感
- * 导航项基于后端业务模块设计
+ * HeroNavbar - 首屏悬浮导航
+ * 内容按后端权限语义过滤，样式保持 Cinematic Hero 玻璃质感。
  */
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Menu, X, LogIn, User } from 'lucide-vue-next'
-import { navItems } from '@/composables/useHeroContent'
+import { LogIn, Menu, User, X } from 'lucide-vue-next'
+import { useHeroContent } from '@/composables/useHeroContent'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
+const { navItems } = useHeroContent()
 
-/** 移动端菜单是否展开 */
 const mobileMenuOpen = ref(false)
-
-/** 是否已经滚动过（用于添加背景模糊） */
 const scrolled = ref(false)
 
 function handleScroll() {
-  scrolled.value = window.scrollY > 50
+  scrolled.value = window.scrollY > 24
 }
-
-onMounted(() => window.addEventListener('scroll', handleScroll, { passive: true }))
-onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
 function navigate(href: string) {
   mobileMenuOpen.value = false
   if (href.startsWith('#')) {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
-  } else {
-    router.push(href)
+    return
   }
+  router.push(href)
 }
+
+onMounted(() => {
+  handleScroll()
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
-  <nav
-    :class="[
-      'fixed top-4 left-0 right-0 z-50 px-6 lg:px-16 transition-all duration-500',
-    ]"
-  >
+  <nav class="fixed top-4 left-0 right-0 z-50 px-8 lg:px-16">
     <div
       :class="[
-        'mx-auto max-w-7xl rounded-full px-6 py-3 flex items-center justify-between transition-all duration-500',
-        scrolled ? 'liquid-glass-strong bg-black/20' : 'bg-transparent',
+        'mx-auto max-w-7xl rounded-full px-4 md:px-6 py-3 flex items-center justify-between transition-all duration-300',
+        scrolled ? 'liquid-glass bg-black/25 shadow-lg shadow-black/20' : 'bg-transparent',
       ]"
     >
-      <!-- Logo -->
-      <a
+      <button
         class="flex items-center gap-2 cursor-pointer select-none"
-        @click.prevent="navigate('/')"
+        type="button"
+        @click="navigate('/')"
       >
         <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-          <span class="text-white font-heading text-lg italic font-bold">S</span>
+          <span class="text-white font-heading text-lg italic font-semibold">S</span>
         </div>
-        <span class="text-white font-heading text-xl italic tracking-tight hidden sm:inline">
-          SmartCommunity
-        </span>
-      </a>
+        <span class="hidden sm:inline text-white font-heading italic text-xl tracking-tight">SmartCommunity</span>
+      </button>
 
-      <!-- 桌面导航 -->
       <div class="hidden md:flex items-center gap-1">
-        <a
+        <button
           v-for="item in navItems"
           :key="item.href"
-          class="px-4 py-2 text-sm font-body text-white/80 hover:text-white rounded-full
-                 hover:bg-white/5 transition-all duration-300 cursor-pointer select-none"
-          @click.prevent="navigate(item.href)"
+          type="button"
+          class="px-4 py-2 text-sm font-body text-white/80 hover:text-white hover:bg-white/8 rounded-full transition-all duration-300 cursor-pointer"
+          @click="navigate(item.href)"
         >
           {{ item.label }}
-        </a>
+        </button>
       </div>
 
-      <!-- 右侧操作区 -->
-      <div class="flex items-center gap-3">
-        <!-- 登录按钮 / 用户信息 -->
+      <div class="flex items-center gap-2">
         <button
           v-if="!userStore.isLoggedIn"
-          class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-body font-medium
-                 text-white liquid-glass rounded-full cursor-pointer hover:bg-white/10 transition-all duration-300"
+          type="button"
+          class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full liquid-glass text-white text-sm font-body font-medium hover:bg-white/10 transition-all"
           @click="navigate('/login')"
         >
-          <LogIn :size="16" />
+          <LogIn :size="15" />
           登录
         </button>
         <button
           v-else
-          class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-body font-medium
-                 text-white liquid-glass rounded-full cursor-pointer hover:bg-white/10 transition-all duration-300"
+          type="button"
+          class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full liquid-glass text-white text-sm font-body font-medium hover:bg-white/10 transition-all"
           @click="navigate('/profile')"
         >
-          <User :size="16" />
-          {{ userStore.nickname || '个人中心' }}
+          <User :size="15" />
+          {{ userStore.nickname || '居民服务' }}
         </button>
 
-        <!-- 移动端汉堡菜单 -->
         <button
-          class="md:hidden text-white p-2 rounded-full hover:bg-white/10 transition-all cursor-pointer"
+          type="button"
+          class="md:hidden p-2 rounded-full text-white hover:bg-white/10 transition-all"
           @click="mobileMenuOpen = !mobileMenuOpen"
         >
           <Menu v-if="!mobileMenuOpen" :size="22" />
@@ -107,7 +101,6 @@ function navigate(href: string) {
       </div>
     </div>
 
-    <!-- 移动端下拉菜单 -->
     <Transition
       enter-active-class="transition-all duration-300 ease-out"
       enter-from-class="opacity-0 -translate-y-2"
@@ -118,21 +111,22 @@ function navigate(href: string) {
     >
       <div
         v-if="mobileMenuOpen"
-        class="md:hidden mt-2 mx-4 rounded-2xl liquid-glass-strong py-4 px-6"
+        class="md:hidden mt-2 liquid-glass-strong rounded-2xl px-5 py-4"
       >
-        <a
+        <button
           v-for="item in navItems"
           :key="item.href"
-          class="block py-3 text-sm font-body text-white/90 hover:text-white
-                 border-b border-white/5 last:border-0 cursor-pointer"
-          @click.prevent="navigate(item.href)"
+          type="button"
+          class="w-full text-left py-2.5 text-sm font-body text-white/90 hover:text-white border-b border-white/8 last:border-0"
+          @click="navigate(item.href)"
         >
           {{ item.label }}
-        </a>
+        </button>
+
         <button
           v-if="!userStore.isLoggedIn"
-          class="w-full mt-3 py-2.5 text-sm font-body font-medium text-white
-                 liquid-glass rounded-full cursor-pointer hover:bg-white/10 transition-all"
+          type="button"
+          class="mt-3 w-full px-4 py-2.5 rounded-full liquid-glass text-white text-sm font-body"
           @click="navigate('/login')"
         >
           登录 / 注册
