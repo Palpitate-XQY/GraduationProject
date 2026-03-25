@@ -1,64 +1,84 @@
 /**
  * 用户状态管理
  */
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { CurrentUserVO } from '@/types/auth'
 import { getMe, logout as apiLogout } from '@/api/auth'
+import type { CurrentUserVO } from '@/types/auth'
 
 export const useUserStore = defineStore('user', () => {
-  /* ---- state ---- */
   const token = ref(localStorage.getItem('access_token') || '')
   const userInfo = ref<CurrentUserVO | null>(null)
+  const userLoaded = ref(false)
 
-  /* ---- getters ---- */
-  const isLoggedIn = computed(() => !!token.value)
+  const isLoggedIn = computed(() => Boolean(token.value))
   const nickname = computed(() => userInfo.value?.nickname ?? '')
   const roleCodes = computed(() => userInfo.value?.roleCodes ?? [])
   const permissionCodes = computed(() => userInfo.value?.permissionCodes ?? [])
 
-  /** 是否拥有某个权限 */
-  const hasPermission = (code: string) => permissionCodes.value.includes(code)
-
-  /* ---- actions ---- */
-
-  /** 设置 token */
-  function setToken(t: string) {
-    token.value = t
-    localStorage.setItem('access_token', t)
+  function hasPermission(code: string) {
+    return permissionCodes.value.includes(code)
   }
 
-  /** 获取当前用户信息 */
-  async function fetchUserInfo() {
+  function hasAnyPermission(codes: string[]) {
+    if (!codes.length) return true
+    return codes.some((code) => permissionCodes.value.includes(code))
+  }
+
+  function setToken(value: string) {
+    token.value = value
+    localStorage.setItem('access_token', value)
+  }
+
+  function clearAuth() {
+    token.value = ''
+    userInfo.value = null
+    userLoaded.value = false
+    localStorage.removeItem('access_token')
+  }
+
+  async function fetchUserInfo(force = false) {
+    if (userLoaded.value && userInfo.value && !force) {
+      return userInfo.value
+    }
+    const res = await getMe()
+    userInfo.value = res.data
+    userLoaded.value = true
+    return userInfo.value
+  }
+
+  async function ensureUserInfo() {
+    if (!token.value) return null
     try {
-      const res = await getMe()
-      userInfo.value = res.data
-    } catch (e) {
-      console.error('获取用户信息失败', e)
+      return await fetchUserInfo()
+    } catch {
+      clearAuth()
+      throw new Error('用户登录已失效')
     }
   }
 
-  /** 登出 */
   async function doLogout() {
     try {
       await apiLogout()
     } finally {
-      token.value = ''
-      userInfo.value = null
-      localStorage.removeItem('access_token')
+      clearAuth()
     }
   }
 
   return {
     token,
     userInfo,
+    userLoaded,
     isLoggedIn,
     nickname,
     roleCodes,
     permissionCodes,
     hasPermission,
+    hasAnyPermission,
     setToken,
+    clearAuth,
     fetchUserInfo,
+    ensureUserInfo,
     doLogout,
   }
 })

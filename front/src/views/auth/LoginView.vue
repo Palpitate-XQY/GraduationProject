@@ -1,17 +1,19 @@
 <script setup lang="ts">
 /**
- * LoginView — 登录页面
- * 保持 cinematic 风格，叠加在视频背景之上
+ * LoginView - 登录页
  */
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { LogIn, Eye, EyeOff } from 'lucide-vue-next'
+import { Eye, EyeOff, LogIn } from 'lucide-vue-next'
 import { login } from '@/api/auth'
+import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 
 const form = reactive({
   username: '',
@@ -31,11 +33,22 @@ async function handleLogin() {
   try {
     const res = await login({ username: form.username, password: form.password })
     userStore.setToken(res.data.accessToken)
-    await userStore.fetchUserInfo()
+    await userStore.fetchUserInfo(true)
+
+    const redirect = (route.query.redirect as string) || ''
+    if (redirect) {
+      router.push(redirect)
+      return
+    }
+
+    if (userStore.hasPermission('dashboard:view')) {
+      await appStore.fetchDashboardOverview(true)
+      router.push(appStore.defaultHomeRoute)
+    } else {
+      router.push('/')
+    }
+
     ElMessage.success('登录成功')
-    router.push('/')
-  } catch (e: any) {
-    // 错误已在拦截器中处理
   } finally {
     loading.value = false
   }
@@ -44,7 +57,6 @@ async function handleLogin() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center relative overflow-hidden">
-    <!-- 视频背景 -->
     <video
       class="absolute inset-0 w-full h-full object-cover z-0"
       autoplay
@@ -52,61 +64,45 @@ async function handleLogin() {
       muted
       playsinline
       preload="auto"
+      poster="/images/smart_community_bg.jpeg"
     >
-      <source
-        src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4"
-        type="video/mp4"
-      />
+      <source src="https://cdn.pixabay.com/video/2020/05/24/40090-424838562_large.mp4" type="video/mp4" />
     </video>
     <div class="absolute inset-0 bg-black/50 z-0" />
 
-    <!-- 登录卡片 -->
     <div class="relative z-10 w-full max-w-md mx-4">
       <div class="liquid-glass-strong rounded-3xl p-8 md:p-10">
-        <!-- Logo -->
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/10 mb-4">
-            <span class="text-white font-heading text-2xl italic font-bold">S</span>
+            <span class="text-white font-heading text-2xl italic font-semibold">S</span>
           </div>
           <h1 class="text-2xl font-heading italic text-white tracking-tight">SmartCommunity</h1>
           <p class="text-white/60 text-sm font-body mt-1">智慧社区服务平台</p>
         </div>
 
-        <!-- 表单 -->
-        <form @submit.prevent="handleLogin" class="space-y-5">
+        <form class="space-y-5" @submit.prevent="handleLogin">
           <div>
-            <label class="block text-white/70 text-xs font-body mb-2 uppercase tracking-wider">
-              用户名
-            </label>
+            <label class="block text-white/70 text-xs font-body mb-2 uppercase tracking-wider">用户名</label>
             <input
               v-model="form.username"
               type="text"
               placeholder="请输入用户名"
-              class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10
-                     text-white text-sm font-body placeholder-white/30
-                     focus:outline-none focus:border-white/30 focus:bg-white/10
-                     transition-all duration-300"
+              class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-body placeholder-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
             />
           </div>
 
           <div>
-            <label class="block text-white/70 text-xs font-body mb-2 uppercase tracking-wider">
-              密码
-            </label>
+            <label class="block text-white/70 text-xs font-body mb-2 uppercase tracking-wider">密码</label>
             <div class="relative">
               <input
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="请输入密码"
-                class="w-full px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10
-                       text-white text-sm font-body placeholder-white/30
-                       focus:outline-none focus:border-white/30 focus:bg-white/10
-                       transition-all duration-300"
+                class="w-full px-4 py-3 pr-11 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-body placeholder-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
               />
               <button
                 type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-white/40
-                       hover:text-white/70 transition-colors cursor-pointer"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 hover:text-white/75 transition-colors"
                 @click="showPassword = !showPassword"
               >
                 <Eye v-if="!showPassword" :size="18" />
@@ -118,23 +114,16 @@ async function handleLogin() {
           <button
             type="submit"
             :disabled="loading"
-            class="w-full py-3 rounded-full liquid-glass-strong text-white text-sm
-                   font-body font-medium flex items-center justify-center gap-2
-                   hover:scale-[1.02] hover:shadow-lg hover:shadow-white/5
-                   transition-all duration-300 cursor-pointer disabled:opacity-50"
+            class="w-full py-3 rounded-full liquid-glass-strong text-white text-sm font-body font-medium flex items-center justify-center gap-2 hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-50"
           >
             <LogIn :size="18" />
-            {{ loading ? '登录中...' : '登   录' }}
+            {{ loading ? '登录中...' : '登录' }}
           </button>
         </form>
 
-        <!-- 底部链接 -->
         <div class="mt-6 text-center">
-          <router-link
-            to="/"
-            class="text-white/50 text-xs font-body hover:text-white/80 transition-colors"
-          >
-            ← 返回首页
+          <router-link to="/" class="text-white/50 text-xs font-body hover:text-white/80 transition-colors">
+            返回门户首页
           </router-link>
         </div>
       </div>
