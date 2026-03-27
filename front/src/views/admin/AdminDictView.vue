@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -90,7 +90,7 @@ const dataFormRules: FormRules = {
 }
 
 async function loadTypeOptions() {
-  const res = await dictTypePage({ current: 1, size: 500 })
+  const res = await dictTypePage({ current: 1, size: 100 })
   typeOptions.value = Array.isArray(res.data.records) ? res.data.records : []
 }
 

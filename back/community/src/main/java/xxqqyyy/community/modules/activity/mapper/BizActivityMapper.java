@@ -76,4 +76,26 @@ public interface BizActivityMapper {
         @Param("allAccess") boolean allAccess,
         @Param("orgIds") Collection<Long> orgIds
     );
+
+    long countPublishedInPeriod(
+        @Param("startTime") LocalDateTime startTime,
+        @Param("endTime") LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    long countSignupInPeriod(
+        @Param("startTime") LocalDateTime startTime,
+        @Param("endTime") LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    List<String> selectTextCorpusInPeriod(
+        @Param("startTime") LocalDateTime startTime,
+        @Param("endTime") LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds,
+        @Param("limit") int limit
+    );
 }

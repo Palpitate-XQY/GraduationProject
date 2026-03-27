@@ -1032,12 +1032,37 @@ onMounted(async () => {
 
 <style scoped>
 .role-tree-wrapper {
-  min-height: 320px;
+  min-height: 360px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(160deg, rgba(8, 24, 41, 0.54), rgba(7, 18, 33, 0.3));
+  padding: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:deep(.role-tree) {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+:deep(.role-tree .el-tree-node__children) {
+  margin-left: 10px;
+  padding-left: 14px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.12);
 }
 
 :deep(.role-tree .el-tree-node__content) {
   height: auto;
-  padding: 6px 0;
+  padding: 5px 0;
+  background: transparent;
+}
+
+:deep(.role-tree .el-tree-node__content:hover) {
+  background: transparent;
+}
+
+:deep(.role-tree .el-tree-node__expand-icon) {
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .role-node {
@@ -1046,10 +1071,19 @@ onMounted(async () => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 10px 12px;
-  background: rgba(8, 18, 32, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  padding: 11px 12px;
+  background: linear-gradient(150deg, rgba(15, 34, 55, 0.5), rgba(8, 18, 33, 0.34));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.2s ease;
+}
+
+.role-node:hover {
+  transform: translateY(-1px);
+  border-color: rgba(173, 236, 255, 0.32);
+  background: linear-gradient(150deg, rgba(18, 41, 66, 0.56), rgba(8, 21, 38, 0.38));
 }
 
 .role-node-main {
@@ -1066,16 +1100,19 @@ onMounted(async () => {
 
 .role-name {
   color: #fff;
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .role-code {
   color: rgba(255, 255, 255, 0.65);
   font-size: 12px;
+  letter-spacing: 0.03em;
 }
 
 .role-scope-wrap {
-  margin-top: 8px;
+  margin-top: 9px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -1087,5 +1124,26 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 6px;
   justify-content: flex-end;
+}
+
+:deep(.role-scope-wrap .el-tag),
+:deep(.role-node-main .el-tag) {
+  border-radius: 9999px;
+}
+
+:deep(.role-node-actions .el-button) {
+  border-radius: 9999px;
+}
+
+@media (max-width: 1024px) {
+  .role-node {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .role-node-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 </style>

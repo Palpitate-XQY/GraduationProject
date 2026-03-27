@@ -60,4 +60,33 @@ public interface BizRepairOrderMapper {
         @Param("residentUserId") Long residentUserId,
         @Param("statusList") Collection<String> statusList
     );
+
+    long countCreatedInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    long countFinishedInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    Double avgHandleMinutesInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    List<String> selectTextCorpusInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds,
+        @Param("limit") int limit
+    );
 }

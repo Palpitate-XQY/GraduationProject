@@ -63,4 +63,19 @@ public interface BizNoticeMapper {
         @Param("allAccess") boolean allAccess,
         @Param("orgIds") Collection<Long> orgIds
     );
+
+    long countPublishedInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds
+    );
+
+    List<String> selectTextCorpusInPeriod(
+        @Param("startTime") java.time.LocalDateTime startTime,
+        @Param("endTime") java.time.LocalDateTime endTime,
+        @Param("allAccess") boolean allAccess,
+        @Param("orgIds") Collection<Long> orgIds,
+        @Param("limit") int limit
+    );
 }

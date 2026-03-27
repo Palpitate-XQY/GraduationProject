@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xxqqyyy.community.modules.analytics.mapper.BizAnalyticsReportMapper">
+
+    <resultMap id="AnalyticsReportMap" type="xxqqyyy.community.modules.analytics.entity.BizAnalyticsReport">
+        <id property="id" column="id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportDate" column="report_date"/>
+        <result property="scopeKey" column="scope_key"/>
+        <result property="scopeKind" column="scope_kind"/>
+        <result property="periodStart" column="period_start"/>
+        <result property="periodEnd" column="period_end"/>
+        <result property="metricsJson" column="metrics_json"/>
+        <result property="wordcloudJson" column="wordcloud_json"/>
+        <result property="summaryMarkdown" column="summary_markdown"/>
+        <result property="aiMode" column="ai_mode"/>
+        <result property="modelName" column="model_name"/>
+        <result property="status" column="status"/>
+        <result property="generatedAt" column="generated_at"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="base_columns">
+        id, report_type, report_date, scope_key, scope_kind, period_start, period_end,
+        metrics_json, wordcloud_json, summary_markdown, ai_mode, model_name, status,
+        generated_at, create_time, update_time
+    </sql>
+
+    <select id="selectByUnique" resultMap="AnalyticsReportMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_analytics_report
+        WHERE report_type = #{reportType}
+          AND report_date = #{reportDate}
+          AND scope_key = #{scopeKey}
+        LIMIT 1
+    </select>
+
+    <select id="selectLatest" resultMap="AnalyticsReportMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_analytics_report
+        WHERE report_type = #{reportType}
+          AND scope_key = #{scopeKey}
+        ORDER BY report_date DESC, id DESC
+        LIMIT 1
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_analytics_report
+        WHERE scope_key = #{scopeKey}
+          <if test="reportType != null and reportType != ''">
+              AND report_type = #{reportType}
+          </if>
+    </select>
+
+    <select id="selectPage" resultMap="AnalyticsReportMap">
+        SELECT <include refid="base_columns"/>
+        FROM biz_analytics_report
+        WHERE scope_key = #{scopeKey}
+          <if test="reportType != null and reportType != ''">
+              AND report_type = #{reportType}
+          </if>
+        ORDER BY report_date DESC, id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <insert id="upsert" parameterType="xxqqyyy.community.modules.analytics.entity.BizAnalyticsReport"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_analytics_report (
+            report_type, report_date, scope_key, scope_kind, period_start, period_end,
+            metrics_json, wordcloud_json, summary_markdown, ai_mode, model_name, status, generated_at, create_time, update_time
+        ) VALUES (
+            #{reportType}, #{reportDate}, #{scopeKey}, #{scopeKind}, #{periodStart}, #{periodEnd},
+            #{metricsJson}, #{wordcloudJson}, #{summaryMarkdown}, #{aiMode}, #{modelName}, #{status}, #{generatedAt}, NOW(), NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            scope_kind = VALUES(scope_kind),
+            period_start = VALUES(period_start),
+            period_end = VALUES(period_end),
+            metrics_json = VALUES(metrics_json),
+            wordcloud_json = VALUES(wordcloud_json),
+            summary_markdown = VALUES(summary_markdown),
+            ai_mode = VALUES(ai_mode),
+            model_name = VALUES(model_name),
+            status = VALUES(status),
+            generated_at = VALUES(generated_at),
+            update_time = NOW()
+    </insert>
+
+</mapper>
+

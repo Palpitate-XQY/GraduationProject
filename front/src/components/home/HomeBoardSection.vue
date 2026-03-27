@@ -2,11 +2,13 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { AlertCircle, CalendarDays, ChevronRight, RefreshCw, Wrench } from 'lucide-vue-next'
+import { AlertCircle, CalendarDays, ChevronRight, RefreshCw, Sparkles, Wrench } from 'lucide-vue-next'
+import { getLatestAnalyticsReport } from '@/api/analytics'
 import { myActivityPage, residentActivityPage } from '@/api/activity'
 import { residentNoticePage } from '@/api/notice'
 import { myRepairPage } from '@/api/repair'
 import { useUserStore } from '@/stores/user'
+import type { AnalyticsReportVO } from '@/types/analytics'
 import type { ActivityVO } from '@/types/activity'
 import type { NoticeVO } from '@/types/notice'
 import type { RepairOrderVO } from '@/types/repair'
@@ -23,6 +25,9 @@ const activities = ref<ActivityVO[]>([])
 const myActivities = ref<ActivityVO[]>([])
 const notices = ref<NoticeVO[]>([])
 const repairs = ref<RepairOrderVO[]>([])
+const analyticsSummary = ref<AnalyticsReportVO | null>(null)
+const analyticsLoading = ref(false)
+const analyticsError = ref('')
 
 const sectionLoading = reactive<Record<SectionKey, boolean>>({
   activities: false,
@@ -47,6 +52,11 @@ const canViewNoticeList = computed(() => userStore.hasPermission('notice:residen
 const canViewNoticeDetail = computed(() => userStore.hasPermission('notice:resident:view'))
 const canViewRepairList = computed(() => userStore.hasPermission('repair:my:list'))
 const canViewRepairDetail = computed(() => userStore.hasPermission('repair:my:view'))
+const canViewAnalytics = computed(
+  () =>
+    userStore.hasPermission('analytics:report:view') ||
+    userStore.hasPermission('analytics:wordcloud:view'),
+)
 
 const displayName = computed(() => userInfo.value?.nickname || userInfo.value?.username || '')
 const communityName = computed(() => {
@@ -72,6 +82,15 @@ const currentDate = computed(() => {
 const featuredActivity = computed(() => activities.value[0] || null)
 const activityQueue = computed(() => activities.value.slice(1, 4))
 const progressActivities = computed(() => myActivities.value.slice(0, 3))
+const analyticsHighlights = computed(() => {
+  const markdown = analyticsSummary.value?.summaryMarkdown || ''
+  return markdown
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('- '))
+    .slice(0, 3)
+    .map((line) => line.replace(/^- /, ''))
+})
 
 function navigate(path: string) {
   router.push(path)
@@ -252,6 +271,23 @@ async function fetchRepairs() {
   }
 }
 
+async function fetchAnalyticsSummary() {
+  analyticsSummary.value = null
+  analyticsError.value = ''
+  if (!canViewAnalytics.value) {
+    return
+  }
+  analyticsLoading.value = true
+  try {
+    const res = await getLatestAnalyticsReport('DAILY')
+    analyticsSummary.value = res.data
+  } catch (error) {
+    analyticsError.value = error instanceof Error ? error.message : '智能摘要加载失败'
+  } finally {
+    analyticsLoading.value = false
+  }
+}
+
 async function fetchBoardData() {
   try {
     await userStore.ensureUserInfo()
@@ -260,7 +296,7 @@ async function fetchBoardData() {
     return
   }
 
-  await Promise.all([fetchActivities(), fetchMyActivities(), fetchNotices(), fetchRepairs()])
+  await Promise.all([fetchActivities(), fetchMyActivities(), fetchNotices(), fetchRepairs(), fetchAnalyticsSummary()])
 }
 
 onMounted(fetchBoardData)
@@ -551,6 +587,72 @@ onMounted(fetchBoardData)
                 class="liquid-sub-card rounded-2xl p-4 text-sm font-body text-white/65"
               >
                 暂无活动记录
+              </div>
+            </template>
+          </section>
+
+          <div class="h-px bg-white/15" />
+
+          <section class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="flex items-center gap-2 text-lg font-body font-semibold text-white/90">
+                <Sparkles :size="16" />
+                智能日报摘要
+              </h3>
+              <button
+                v-if="canViewAnalytics && userStore.canAccessDashboard"
+                type="button"
+                class="inline-flex items-center gap-1 text-sm font-body text-white/70 transition hover:text-white"
+                @click="navigate('/dashboard/analytics')"
+              >
+                查看详情
+                <ChevronRight :size="15" />
+              </button>
+            </div>
+
+            <div
+              v-if="!canViewAnalytics"
+              class="rounded-2xl border border-white/20 bg-black/15 p-4 text-sm font-body text-white/70"
+            >
+              当前账号暂无“智能分析”访问权限。
+            </div>
+
+            <div v-else-if="analyticsLoading" class="space-y-3">
+              <div class="skeleton-card h-[88px] rounded-2xl" />
+              <div class="skeleton-card h-[88px] rounded-2xl" />
+            </div>
+
+            <div
+              v-else-if="analyticsError"
+              class="rounded-2xl border border-rose-300/30 bg-rose-500/10 p-4 text-white"
+            >
+              <p class="flex items-center gap-2 text-sm font-body">
+                <AlertCircle :size="15" />
+                {{ analyticsError }}
+              </p>
+              <button
+                type="button"
+                class="mt-3 inline-flex items-center gap-2 rounded-full border border-white/25 px-3 py-1.5 text-xs font-body text-white/85"
+                @click="fetchAnalyticsSummary"
+              >
+                <RefreshCw :size="12" />
+                重试
+              </button>
+            </div>
+
+            <template v-else>
+              <div v-if="analyticsSummary" class="liquid-sub-card rounded-2xl p-4">
+                <p class="text-xs font-body text-white/60">生成时间 {{ analyticsSummary.generatedAt }}</p>
+                <ul class="mt-2 space-y-2 text-sm font-body text-white/85">
+                  <li v-for="(line, index) in analyticsHighlights" :key="index">- {{ line }}</li>
+                </ul>
+              </div>
+
+              <div
+                v-if="!analyticsSummary"
+                class="liquid-sub-card rounded-2xl p-4 text-sm font-body text-white/65"
+              >
+                暂无日报摘要
               </div>
             </template>
           </section>

@@ -185,6 +185,11 @@ body {
 
 .admin-page .liquid-glass {
   border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(100% 120% at 5% 5%, rgba(148, 228, 255, 0.12), rgba(148, 228, 255, 0) 38%),
+    radial-gradient(120% 100% at 95% 2%, rgba(120, 214, 176, 0.12), rgba(120, 214, 176, 0) 34%),
+    rgba(8, 21, 37, 0.34);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .admin-page .el-form--inline {
@@ -227,6 +232,23 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.admin-page .el-button--primary {
+  background: linear-gradient(135deg, rgba(61, 169, 227, 0.86), rgba(74, 198, 168, 0.8));
+  border-color: rgba(143, 225, 255, 0.46);
+}
+
+.admin-page .el-button--success {
+  background: linear-gradient(135deg, rgba(52, 180, 132, 0.82), rgba(93, 205, 166, 0.74));
+  border-color: rgba(155, 240, 206, 0.44);
+}
+
+.admin-page .el-button--default,
+.admin-page .el-button.is-plain {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.86);
+}
+
 .admin-page .admin-table {
   overflow: hidden;
   border-radius: 18px;
@@ -256,6 +278,10 @@ body {
   border-bottom-color: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-body);
+}
+
+.admin-page .admin-table .el-table__body tr:nth-child(even) > td.el-table__cell {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .admin-page .admin-table .el-table__row:hover > td.el-table__cell {

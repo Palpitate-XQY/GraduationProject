@@ -19,6 +19,18 @@ export function canAccessRoute(permissionCodes: string[], requiredPermissions?: 
 
 export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
   {
+    key: 'analytics',
+    title: '分析中心',
+    items: [
+      {
+        key: 'analytics-center',
+        label: '智能分析',
+        route: '/dashboard/analytics',
+        permissionCodes: ['analytics:report:view', 'analytics:wordcloud:view'],
+      },
+    ],
+  },
+  {
     key: 'biz',
     title: '业务管理',
     items: [

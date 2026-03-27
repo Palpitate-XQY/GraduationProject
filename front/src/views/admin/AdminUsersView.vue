@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -67,7 +67,7 @@ function resetForm() {
 
 async function loadRoles() {
   try {
-    const res = await rolePage({ current: 1, size: 500 })
+    const res = await rolePage({ current: 1, size: 100 })
     roles.value = Array.isArray(res.data.records) ? res.data.records : []
   } catch {
     roles.value = []

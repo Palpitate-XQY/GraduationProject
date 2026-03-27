@@ -52,3 +52,18 @@ community:
     local-base-path: ${COMMUNITY_LOCAL_STORAGE_PATH:./storage}
     local-access-base-url: /api/files
     max-file-size-bytes: 20971520
+  analytics:
+    enabled: ${COMMUNITY_ANALYTICS_ENABLED:true}
+    max-corpus-per-source: ${COMMUNITY_ANALYTICS_MAX_CORPUS_PER_SOURCE:300}
+    word-cloud-top-n: ${COMMUNITY_ANALYTICS_WORD_CLOUD_TOP_N:80}
+    min-word-frequency: ${COMMUNITY_ANALYTICS_MIN_WORD_FREQUENCY:2}
+    report:
+      daily-cron: ${COMMUNITY_ANALYTICS_DAILY_CRON:0 30 8 * * ?}
+      weekly-cron: ${COMMUNITY_ANALYTICS_WEEKLY_CRON:0 0 9 ? * MON}
+      zone: ${COMMUNITY_ANALYTICS_ZONE:Asia/Shanghai}
+  ai:
+    enabled: ${COMMUNITY_AI_ENABLED:false}
+    base-url: ${COMMUNITY_AI_BASE_URL:https://api.openai.com/v1}
+    api-key: ${COMMUNITY_AI_API_KEY:}
+    model: ${COMMUNITY_AI_MODEL:gpt-4o-mini}
+    timeout-ms: ${COMMUNITY_AI_TIMEOUT_MS:10000}

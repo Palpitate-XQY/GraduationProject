@@ -243,4 +243,76 @@
           </if>
     </select>
 
+    <select id="countPublishedInPeriod" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_activity a
+        WHERE a.deleted = 0
+          AND a.status = 'PUBLISHED'
+          AND a.publish_time IS NOT NULL
+          AND a.publish_time &gt;= #{startTime}
+          AND a.publish_time &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="countSignupInPeriod" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_activity_signup s
+        INNER JOIN biz_activity a ON s.activity_id = a.id
+        WHERE s.deleted = 0
+          AND a.deleted = 0
+          AND s.signup_status = 'SIGNED'
+          AND s.signup_time &gt;= #{startTime}
+          AND s.signup_time &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="selectTextCorpusInPeriod" resultType="string">
+        SELECT CONCAT_WS(' ', a.title, a.content, a.location)
+        FROM biz_activity a
+        WHERE a.deleted = 0
+          AND a.status = 'PUBLISHED'
+          AND a.publish_time IS NOT NULL
+          AND a.publish_time &gt;= #{startTime}
+          AND a.publish_time &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND a.publisher_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+        ORDER BY a.publish_time DESC, a.id DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

@@ -44,8 +44,8 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen text-white">
-    <aside class="hidden lg:flex fixed inset-y-0 left-0 w-72 border-r border-white/8 bg-slate-950/80 backdrop-blur-xl">
+  <div class="admin-layout min-h-screen text-white">
+    <aside class="admin-aside hidden lg:flex fixed inset-y-0 left-0 w-72 border-r border-white/8 bg-slate-950/80 backdrop-blur-xl">
       <div class="w-full p-5">
         <button
           type="button"
@@ -61,7 +61,7 @@ async function handleLogout() {
 
         <button
           type="button"
-          class="mt-3 w-full rounded-xl px-3 py-2 text-left text-sm font-body text-white/85 hover:bg-white/8 transition-all flex items-center gap-2"
+          class="admin-dashboard-entry mt-3 w-full rounded-xl px-3 py-2 text-left text-sm font-body text-white/85 hover:bg-white/8 transition-all flex items-center gap-2"
           :class="{ 'bg-white/10': route.path.startsWith('/dashboard/') }"
           @click="navigate(defaultHomeRoute)"
         >
@@ -77,7 +77,7 @@ async function handleLogout() {
                 v-for="item in group.items"
                 :key="item.key"
                 type="button"
-                class="w-full rounded-xl px-3 py-2 text-left text-sm font-body transition-all"
+                class="admin-menu-btn w-full rounded-xl px-3 py-2 text-left text-sm font-body transition-all"
                 :class="isActive(item.route) ? 'bg-white/12 text-white' : 'text-white/70 hover:bg-white/8 hover:text-white'"
                 @click="navigate(item.route)"
               >
@@ -89,8 +89,8 @@ async function handleLogout() {
       </div>
     </aside>
 
-    <div class="lg:pl-72">
-      <header class="sticky top-0 z-20 px-4 md:px-6 py-4 border-b border-white/8 bg-slate-950/80 backdrop-blur-xl">
+    <div class="admin-right lg:pl-72">
+      <header class="admin-topbar sticky top-0 z-20 px-4 md:px-6 py-4 border-b border-white/8 bg-slate-950/80 backdrop-blur-xl">
         <div class="flex items-center justify-between gap-4">
           <div>
             <h1 class="text-xl md:text-2xl font-heading italic tracking-tight">{{ pageTitle }}</h1>
@@ -98,7 +98,7 @@ async function handleLogout() {
           </div>
           <button
             type="button"
-            class="liquid-glass rounded-full px-4 py-2 text-sm font-body text-white/85 hover:text-white flex items-center gap-2"
+            class="admin-logout-btn liquid-glass rounded-full px-4 py-2 text-sm font-body text-white/85 hover:text-white flex items-center gap-2"
             @click="handleLogout"
           >
             <LogOut :size="15" />
@@ -120,9 +120,62 @@ async function handleLogout() {
         </div>
       </header>
 
-      <main class="p-4 md:p-6 lg:p-8">
+      <main class="admin-main-content p-4 md:p-6 lg:p-8">
         <router-view />
       </main>
     </div>
   </div>
 </template>
+
+<style scoped>
+.admin-layout {
+  position: relative;
+}
+
+.admin-layout::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(80% 60% at 8% 2%, rgba(151, 231, 255, 0.14), rgba(151, 231, 255, 0)),
+    radial-gradient(75% 70% at 94% 4%, rgba(101, 190, 160, 0.12), rgba(101, 190, 160, 0));
+  z-index: 0;
+}
+
+.admin-aside {
+  z-index: 30;
+  box-shadow: 10px 0 36px rgba(0, 0, 0, 0.26), inset -1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.admin-right {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-dashboard-entry,
+.admin-menu-btn {
+  border: 1px solid transparent;
+}
+
+.admin-dashboard-entry:hover,
+.admin-menu-btn:hover {
+  border-color: rgba(186, 239, 255, 0.22);
+}
+
+.admin-topbar {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.admin-logout-btn {
+  transition: transform 0.2s ease;
+}
+
+.admin-logout-btn:hover {
+  transform: translateY(-1px);
+}
+
+.admin-main-content {
+  padding-bottom: 2.5rem;
+}
+</style>

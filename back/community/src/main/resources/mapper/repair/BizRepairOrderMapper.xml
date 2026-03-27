@@ -295,4 +295,93 @@
           </if>
     </select>
 
+    <select id="countCreatedInPeriod" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.create_time &gt;= #{startTime}
+          AND o.create_time &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="countFinishedInPeriod" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.status IN ('DONE', 'CLOSED')
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) IS NOT NULL
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) &gt;= #{startTime}
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="avgHandleMinutesInPeriod" resultType="double">
+        SELECT AVG(TIMESTAMPDIFF(MINUTE, o.create_time, COALESCE(o.confirm_time, o.closed_time, o.finish_time)))
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) IS NOT NULL
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) &gt;= #{startTime}
+          AND COALESCE(o.confirm_time, o.closed_time, o.finish_time) &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+    </select>
+
+    <select id="selectTextCorpusInPeriod" resultType="string">
+        SELECT CONCAT_WS(' ', o.title, o.description, o.process_desc, o.finish_desc, o.reject_reason, o.resident_feedback, o.evaluate_content)
+        FROM biz_repair_order o
+        WHERE o.deleted = 0
+          AND o.create_time &gt;= #{startTime}
+          AND o.create_time &lt; #{endTime}
+          <if test="!allAccess">
+              <choose>
+                  <when test="orgIds != null and orgIds.size() > 0">
+                      AND o.complex_org_id IN
+                      <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+                          #{orgId}
+                      </foreach>
+                  </when>
+                  <otherwise>
+                      AND 1 = 2
+                  </otherwise>
+              </choose>
+          </if>
+        ORDER BY o.create_time DESC, o.id DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

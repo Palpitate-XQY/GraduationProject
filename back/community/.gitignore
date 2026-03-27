@@ -40,3 +40,6 @@ build/
 
 ### Embedded Git Backup ###
 .git_disabled_by_codex/
+
+### Runtime Storage ###
+storage/

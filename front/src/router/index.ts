@@ -260,6 +260,17 @@ const routes: RouteRecordRaw[] = [
           permissions: ['sys:storage:view'],
         },
       },
+      {
+        path: 'analytics',
+        name: 'AdminAnalytics',
+        component: () => import('@/views/admin/AdminAnalyticsView.vue'),
+        meta: {
+          title: '智能分析中心',
+          description: '词云分析、日报周报与 AI 摘要中心。',
+          requiresAuth: true,
+          permissions: ['analytics:report:view', 'analytics:wordcloud:view'],
+        },
+      },
     ],
   },
   {

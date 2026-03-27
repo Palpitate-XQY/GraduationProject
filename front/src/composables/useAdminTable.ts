@@ -1,10 +1,24 @@
-﻿import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import type { PageQuery, PageResult } from '@/types/common'
 
 type Fetcher<T, Q extends PageQuery> = (query: Q) => Promise<{ data: PageResult<T> }>
 
+const MIN_PAGE_SIZE = 1
+const MAX_PAGE_SIZE = 100
+
 function ensureArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : []
+}
+
+function normalizePageQuery<Q extends PageQuery>(query: Q) {
+  const current = Number(query.current)
+  const size = Number(query.size)
+  query.current = Number.isFinite(current) && current > 0 ? Math.floor(current) : 1
+  if (!Number.isFinite(size)) {
+    query.size = 10
+    return
+  }
+  query.size = Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, Math.floor(size)))
 }
 
 /**
@@ -20,6 +34,7 @@ export function useAdminTable<T, Q extends PageQuery>(initialQuery: Q, fetcher: 
   const totalPages = computed(() => Math.max(1, Math.ceil(total.value / (query.size || 10))))
 
   async function load() {
+    normalizePageQuery(query)
     loading.value = true
     error.value = ''
     try {
