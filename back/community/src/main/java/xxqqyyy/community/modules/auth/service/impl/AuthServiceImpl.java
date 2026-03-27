@@ -3,8 +3,12 @@ package xxqqyyy.community.modules.auth.service.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,8 +25,10 @@ import xxqqyyy.community.modules.auth.dto.UpdatePasswordRequest;
 import xxqqyyy.community.modules.auth.service.AuthService;
 import xxqqyyy.community.modules.auth.vo.CurrentUserVO;
 import xxqqyyy.community.modules.auth.vo.LoginVO;
+import xxqqyyy.community.modules.auth.vo.ResidentRegisterComplexOptionVO;
 import xxqqyyy.community.modules.auth.vo.SendResetCodeVO;
 import xxqqyyy.community.modules.log.service.LoginLogService;
+import xxqqyyy.community.modules.org.dto.OrgQuery;
 import xxqqyyy.community.modules.org.entity.SysOrg;
 import xxqqyyy.community.modules.org.enums.OrgTypeEnum;
 import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
@@ -162,6 +168,39 @@ public class AuthServiceImpl implements AuthService {
         profile.setCreateBy(user.getId());
         profile.setUpdateBy(user.getId());
         bizResidentProfileMapper.insert(profile);
+    }
+
+    @Override
+    public List<ResidentRegisterComplexOptionVO> residentRegisterComplexOptions() {
+        OrgQuery query = new OrgQuery();
+        query.setOrgType(OrgTypeEnum.COMPLEX.getCode());
+        query.setStatus(1);
+
+        List<SysOrg> complexes = sysOrgMapper.selectTree(query, true, null);
+        if (complexes == null || complexes.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> communityOrgIds = complexes.stream()
+            .map(SysOrg::getParentId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        Map<Long, SysOrg> communityMap = sysOrgMapper.selectByIds(communityOrgIds).stream()
+            .filter(item -> OrgTypeEnum.COMMUNITY.getCode().equalsIgnoreCase(item.getOrgType()))
+            .collect(Collectors.toMap(SysOrg::getId, item -> item));
+
+        return complexes.stream()
+            .map(item -> {
+                SysOrg community = item.getParentId() == null ? null : communityMap.get(item.getParentId());
+                return ResidentRegisterComplexOptionVO.builder()
+                    .complexOrgId(item.getId())
+                    .complexOrgName(item.getOrgName())
+                    .communityOrgId(community == null ? null : community.getId())
+                    .communityOrgName(community == null ? null : community.getOrgName())
+                    .build();
+            })
+            .toList();
     }
 
     @Override

@@ -1,15 +1,12 @@
 /**
- * 认证相关类型
- * 对应后端 auth 模块
+ * Authentication related types.
  */
 
-/** 登录请求 */
 export interface LoginRequest {
   username: string
   password: string
 }
 
-/** 登录响应 */
 export interface LoginVO {
   accessToken: string
   tokenType: string
@@ -17,7 +14,6 @@ export interface LoginVO {
   mustChangePassword: number
 }
 
-/** 当前用户信息 */
 export interface CurrentUserVO {
   userId: number
   username: string
@@ -28,15 +24,25 @@ export interface CurrentUserVO {
   permissionCodes: string[]
 }
 
-/** 居民注册请求 */
 export interface ResidentRegisterRequest {
   username: string
   password: string
   nickname: string
-  phone?: string
+  phone: string
+  email?: string
+  complexOrgId: number
+  roomNo: string
+  emergencyContact?: string
+  emergencyPhone?: string
 }
 
-/** 修改密码请求 */
+export interface ResidentRegisterComplexOptionVO {
+  complexOrgId: number
+  complexOrgName: string
+  communityOrgId?: number | null
+  communityOrgName?: string | null
+}
+
 export interface UpdatePasswordRequest {
   oldPassword: string
   newPassword: string
