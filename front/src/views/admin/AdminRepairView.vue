@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageShell from '@/components/admin/AdminPageShell.vue'
@@ -28,6 +28,15 @@ import {
 import type { RepairOrderLogVO, RepairOrderVO } from '@/types/repair'
 import type { RoleVO, UserVO } from '@/types/system'
 import { toBackendQueryDateTime } from '@/utils/datetime'
+
+const ASSIGN_ROLE_FETCH_SIZE = 100
+const ASSIGN_USER_FETCH_SIZE = 100
+
+interface AssignRoleGroup {
+  key: string
+  label: string
+  roles: RoleVO[]
+}
 
 const { can } = useActionPermission()
 const { byType: orgByType, loadOrgOptions } = useOrgOptions()
@@ -99,6 +108,28 @@ const assignableChildRoles = computed(() => {
   return assignRolePool.value.filter(
     (role) => role.status === 1 && role.parentRoleId != null && myRoleIdSet.has(role.parentRoleId),
   )
+})
+const groupedAssignableChildRoles = computed<AssignRoleGroup[]>(() => {
+  const roleMap = new Map(assignRolePool.value.map((item) => [item.id, item]))
+  const groupMap = new Map<string, AssignRoleGroup>()
+
+  assignableChildRoles.value.forEach((role) => {
+    const parent = role.parentRoleId ? roleMap.get(role.parentRoleId) : null
+    const key = parent ? `parent-${parent.id}` : 'parent-unknown'
+    if (!groupMap.has(key)) {
+      groupMap.set(key, {
+        key,
+        label: parent ? `${parent.roleName} (${parent.roleCode})` : '未识别父角色',
+        roles: [],
+      })
+    }
+    groupMap.get(key)!.roles.push(role)
+  })
+
+  return Array.from(groupMap.values()).map((group) => ({
+    ...group,
+    roles: group.roles.slice().sort((a, b) => a.sort - b.sort || a.id - b.id),
+  }))
 })
 const assignableUsers = computed(() => {
   const keyword = assignForm.keyword.trim().toLowerCase()
@@ -192,6 +223,44 @@ function handleAssignRoleChange() {
   assignForm.maintainerUserId = undefined
 }
 
+async function fetchAllRolesForAssign() {
+  const result: RoleVO[] = []
+  let current = 1
+  let totalCount = 0
+
+  while (true) {
+    const res = await rolePage({ current, size: ASSIGN_ROLE_FETCH_SIZE, keyword: '' })
+    const records = Array.isArray(res.data.records) ? res.data.records : []
+    totalCount = Number(res.data.total || 0)
+    result.push(...records)
+    if (!records.length || result.length >= totalCount) break
+    current += 1
+  }
+
+  const dedupe = new Map<number, RoleVO>()
+  result.forEach((item) => dedupe.set(item.id, item))
+  return Array.from(dedupe.values())
+}
+
+async function fetchAllUsersForAssign() {
+  const result: UserVO[] = []
+  let current = 1
+  let totalCount = 0
+
+  while (true) {
+    const res = await userPage({ current, size: ASSIGN_USER_FETCH_SIZE, keyword: '', status: 1 })
+    const records = Array.isArray(res.data.records) ? res.data.records : []
+    totalCount = Number(res.data.total || 0)
+    result.push(...records)
+    if (!records.length || result.length >= totalCount) break
+    current += 1
+  }
+
+  const dedupe = new Map<number, UserVO>()
+  result.forEach((item) => dedupe.set(item.id, item))
+  return Array.from(dedupe.values())
+}
+
 async function actionAssign() {
   if (!detail.value) return
   if (!canLoadAssignablePool.value) {
@@ -203,12 +272,12 @@ async function actionAssign() {
   assignVisible.value = true
   assignLoading.value = true
   try {
-    const [roleRes, userRes] = await Promise.all([
-      rolePage({ current: 1, size: 500, keyword: '' }),
-      userPage({ current: 1, size: 500, keyword: '', status: 1 }),
+    const [roles, users] = await Promise.all([
+      fetchAllRolesForAssign(),
+      fetchAllUsersForAssign(),
     ])
-    assignRolePool.value = Array.isArray(roleRes.data.records) ? roleRes.data.records : []
-    assignUserPool.value = Array.isArray(userRes.data.records) ? userRes.data.records : []
+    assignRolePool.value = roles
+    assignUserPool.value = users
 
     if (assignableChildRoles.value.length === 1) {
       assignForm.roleId = assignableChildRoles.value[0].id
@@ -493,12 +562,18 @@ onMounted(async () => {
               :disabled="!!assignError"
               @change="handleAssignRoleChange"
             >
-              <el-option
-                v-for="role in assignableChildRoles"
-                :key="role.id"
-                :label="`${role.roleName} (${role.roleCode})`"
-                :value="role.id"
-              />
+              <el-option-group
+                v-for="group in groupedAssignableChildRoles"
+                :key="group.key"
+                :label="group.label"
+              >
+                <el-option
+                  v-for="role in group.roles"
+                  :key="role.id"
+                  :label="`${role.roleName} (${role.roleCode})`"
+                  :value="role.id"
+                />
+              </el-option-group>
             </el-select>
           </el-form-item>
 
