@@ -1,23 +1,33 @@
-/**
- * 公告 API
- * 对应后端 NoticeController: /api/notices
+﻿/**
+ * Notice APIs.
  */
 import request from '@/utils/request'
 import type { ApiResponse, PageResult } from '@/types/common'
-import type { NoticeVO, NoticePageQuery } from '@/types/notice'
+import type { NoticeCreateRequest, NoticePageQuery, NoticeUpdateRequest, NoticeVO } from '@/types/notice'
 
-/** 居民端公告分页 */
 export const residentNoticePage = (params: NoticePageQuery) =>
   request.get<any, ApiResponse<PageResult<NoticeVO>>>('/api/notices/resident/page', { params })
 
-/** 居民端公告详情 */
 export const residentNoticeDetail = (id: number) =>
   request.get<any, ApiResponse<NoticeVO>>(`/api/notices/resident/${id}`)
 
-/** 管理端公告分页 */
 export const manageNoticePage = (params: NoticePageQuery) =>
   request.get<any, ApiResponse<PageResult<NoticeVO>>>('/api/notices', { params })
 
-/** 管理端公告详情 */
 export const manageNoticeDetail = (id: number) =>
   request.get<any, ApiResponse<NoticeVO>>(`/api/notices/${id}`)
+
+export const createNotice = (data: NoticeCreateRequest) =>
+  request.post<any, ApiResponse<void>>('/api/notices', data)
+
+export const updateNotice = (data: NoticeUpdateRequest) =>
+  request.put<any, ApiResponse<void>>('/api/notices', data)
+
+export const deleteNotice = (id: number) =>
+  request.delete<any, ApiResponse<void>>(`/api/notices/${id}`)
+
+export const publishNotice = (id: number) =>
+  request.post<any, ApiResponse<void>>(`/api/notices/${id}/publish`)
+
+export const recallNotice = (id: number) =>
+  request.post<any, ApiResponse<void>>(`/api/notices/${id}/recall`)

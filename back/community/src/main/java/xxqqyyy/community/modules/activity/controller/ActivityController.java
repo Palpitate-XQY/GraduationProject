@@ -105,6 +105,13 @@ public class ActivityController {
         return ApiResponse.success(activityService.residentPage(query));
     }
 
+    @GetMapping("/my/page")
+    @PreAuthorize("hasAuthority('activity:signup')")
+    @Operation(summary = "我的已报名活动分页")
+    public ApiResponse<PageResult<ActivityVO>> myPage(@Valid ActivityPageQuery query) {
+        return ApiResponse.success(activityService.myPage(query));
+    }
+
     @GetMapping("/resident/{id}")
     @PreAuthorize("hasAuthority('activity:resident:view')")
     @Operation(summary = "居民活动详情")

@@ -36,6 +36,6 @@ export interface HeroContent {
   quickEntries: QuickEntry[]
   partners: PartnerItem[]
   partnerSlogan: string
-  videoUrl: string
+  iframeSrc: string
   posterUrl: string
 }

@@ -15,6 +15,13 @@ export const useUserStore = defineStore('user', () => {
   const nickname = computed(() => userInfo.value?.nickname ?? '')
   const roleCodes = computed(() => userInfo.value?.roleCodes ?? [])
   const permissionCodes = computed(() => userInfo.value?.permissionCodes ?? [])
+  const isResidentOnly = computed(() => {
+    const roles = roleCodes.value
+    return roles.length === 1 && roles[0] === 'RESIDENT'
+  })
+  const canAccessDashboard = computed(
+    () => permissionCodes.value.includes('dashboard:view') && !isResidentOnly.value,
+  )
 
   function hasPermission(code: string) {
     return permissionCodes.value.includes(code)
@@ -73,6 +80,8 @@ export const useUserStore = defineStore('user', () => {
     nickname,
     roleCodes,
     permissionCodes,
+    isResidentOnly,
+    canAccessDashboard,
     hasPermission,
     hasAnyPermission,
     setToken,

@@ -1,9 +1,6 @@
-/**
- * 报修类型
- * 对应后端 repair 模块
+﻿/**
+ * Repair types.
  */
-
-/** 报修工单状态枚举 */
 export type RepairStatus =
   | 'PENDING_ACCEPT'
   | 'ACCEPTED'
@@ -15,11 +12,10 @@ export type RepairStatus =
   | 'REJECTED'
   | 'REOPENED'
 
-/** 报修状态中文映射 */
 export const REPAIR_STATUS_MAP: Record<RepairStatus, string> = {
   PENDING_ACCEPT: '待受理',
   ACCEPTED: '已受理',
-  ASSIGNED: '已分派',
+  ASSIGNED: '已转派',
   PROCESSING: '处理中',
   WAIT_CONFIRM: '待确认',
   DONE: '已完成',
@@ -28,7 +24,13 @@ export const REPAIR_STATUS_MAP: Record<RepairStatus, string> = {
   REOPENED: '重新处理',
 }
 
-/** 报修工单 VO */
+export interface RepairAttachmentVO {
+  id: number
+  fileId: number
+  attachmentType: string
+  createTime: string
+}
+
 export interface RepairOrderVO {
   id: number
   orderNo: string
@@ -64,22 +66,30 @@ export interface RepairOrderVO {
   attachments: RepairAttachmentVO[]
 }
 
-export interface RepairAttachmentVO {
+export interface RepairOrderLogVO {
   id: number
-  fileId: number
-  attachmentType: string
-  createTime: string
+  repairOrderId: number
+  fromStatus?: string | null
+  toStatus?: string | null
+  operationType: string
+  operatorUserId?: number | null
+  operationRemark?: string | null
+  operationTime: string
 }
 
-/** 报修查询 */
 export interface RepairPageQuery {
   current?: number
   size?: number
   keyword?: string
   status?: string
+  complexOrgId?: number
+  propertyCompanyOrgId?: number
+  maintainerUserId?: number
+  residentUserId?: number
+  createStartTime?: string
+  createEndTime?: string
 }
 
-/** 创建报修请求 */
 export interface RepairCreateRequest {
   title: string
   description: string
@@ -90,6 +100,41 @@ export interface RepairCreateRequest {
   complexOrgId: number
   propertyCompanyOrgId?: number
   attachmentFileIds?: number[]
+}
+
+export interface RepairAcceptRequest {
+  remark?: string
+}
+
+export interface RepairRejectRequest {
+  reason: string
+}
+
+export interface RepairAssignRequest {
+  maintainerUserId: number
+  remark?: string
+}
+
+export interface RepairTakeRequest {
+  remark?: string
+}
+
+export interface RepairProcessRequest {
+  processDesc: string
+  attachmentFileIds?: number[]
+}
+
+export interface RepairSubmitRequest {
+  finishDesc: string
+  attachmentFileIds?: number[]
+}
+
+export interface RepairConfirmRequest {
+  remark?: string
+}
+
+export interface RepairCloseRequest {
+  remark?: string
 }
 
 export interface RepairReopenRequest {

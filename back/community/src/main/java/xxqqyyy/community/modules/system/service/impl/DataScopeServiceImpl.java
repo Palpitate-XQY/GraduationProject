@@ -1,11 +1,13 @@
 package xxqqyyy.community.modules.system.service.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import xxqqyyy.community.common.enums.ErrorCode;
 import xxqqyyy.community.common.exception.BizException;
 import xxqqyyy.community.modules.org.entity.BizComplexPropertyRel;
@@ -19,10 +21,7 @@ import xxqqyyy.community.modules.system.model.DataScopeResult;
 import xxqqyyy.community.modules.system.service.DataScopeService;
 
 /**
- * 数据范围服务实现。
- *
- * @author codex
- * @since 1.0.0
+ * Data scope service implementation.
  */
 @Service
 @RequiredArgsConstructor
@@ -41,9 +40,11 @@ public class DataScopeServiceImpl implements DataScopeService {
         if (roleCodes.stream().anyMatch(code -> SUPER_ADMIN_ROLE_CODE.equalsIgnoreCase(code))) {
             return DataScopeResult.builder().allAccess(true).build();
         }
+
         List<Long> roleIds = sysRoleMapper.selectRoleIdsByUserId(userId);
         List<SysRoleScope> scopes = sysRoleScopeMapper.selectByRoleIds(roleIds);
         Set<Long> orgIds = new HashSet<>();
+
         for (SysRoleScope scope : scopes) {
             String scopeType = scope.getScopeType();
             if (DataScopeTypeEnum.ALL.getCode().equalsIgnoreCase(scopeType)) {
@@ -53,6 +54,7 @@ public class DataScopeServiceImpl implements DataScopeService {
             if (DataScopeTypeEnum.SELF.getCode().equalsIgnoreCase(scopeType) || refId == null) {
                 continue;
             }
+
             orgIds.add(refId);
             if (DataScopeTypeEnum.PROPERTY_COMPANY.getCode().equalsIgnoreCase(scopeType)) {
                 List<BizComplexPropertyRel> relList = bizComplexPropertyRelMapper.selectByPropertyCompanyOrgId(refId);
@@ -63,6 +65,7 @@ public class DataScopeServiceImpl implements DataScopeService {
                     orgIds.add(rel.getComplexOrgId());
                 }
             }
+
             if (DataScopeTypeEnum.STREET.getCode().equalsIgnoreCase(scopeType)
                 || DataScopeTypeEnum.COMMUNITY.getCode().equalsIgnoreCase(scopeType)
                 || DataScopeTypeEnum.COMPLEX.getCode().equalsIgnoreCase(scopeType)
@@ -70,6 +73,7 @@ public class DataScopeServiceImpl implements DataScopeService {
                 orgIds.addAll(sysOrgMapper.selectDescendantIds(refId));
             }
         }
+
         return DataScopeResult.builder().allAccess(false).orgIds(orgIds).build();
     }
 
@@ -89,16 +93,21 @@ public class DataScopeServiceImpl implements DataScopeService {
 
     @Override
     public void assertRoleScopeGrantable(Long creatorUserId, Set<String> scopeTypes, Set<Long> scopeRefIds) {
+        Set<String> safeScopeTypes = CollectionUtils.isEmpty(scopeTypes) ? Collections.emptySet() : scopeTypes;
+        Set<Long> safeScopeRefIds = CollectionUtils.isEmpty(scopeRefIds) ? Collections.emptySet() : scopeRefIds;
+
         List<String> roleCodes = sysRoleMapper.selectRoleCodesByUserId(creatorUserId);
         if (roleCodes.stream().anyMatch(code -> SUPER_ADMIN_ROLE_CODE.equalsIgnoreCase(code))) {
             return;
         }
-        if (scopeTypes.stream().anyMatch(type -> DataScopeTypeEnum.ALL.getCode().equalsIgnoreCase(type))) {
+
+        if (safeScopeTypes.stream().anyMatch(type -> DataScopeTypeEnum.ALL.getCode().equalsIgnoreCase(type))) {
             throw new BizException(ErrorCode.DATA_SCOPE_DENIED, "非超级管理员不可分配 ALL 数据范围");
         }
+
         DataScopeResult creatorScope = resolveByUserId(creatorUserId);
         Set<Long> allowOrgIds = creatorScope.getSafeOrgIds();
-        for (Long scopeRefId : scopeRefIds) {
+        for (Long scopeRefId : safeScopeRefIds) {
             if (scopeRefId == null) {
                 continue;
             }
@@ -106,7 +115,10 @@ public class DataScopeServiceImpl implements DataScopeService {
                 throw new BizException(ErrorCode.DATA_SCOPE_DENIED, "角色数据范围越权下发");
             }
         }
-        boolean hasInvalidScopeType = scopeTypes.stream().filter(Objects::nonNull).anyMatch(type -> !DataScopeTypeEnum.valid(type));
+
+        boolean hasInvalidScopeType = safeScopeTypes.stream()
+            .filter(Objects::nonNull)
+            .anyMatch(type -> !DataScopeTypeEnum.valid(type));
         if (hasInvalidScopeType) {
             throw new BizException(ErrorCode.BAD_REQUEST, "存在非法数据范围类型");
         }

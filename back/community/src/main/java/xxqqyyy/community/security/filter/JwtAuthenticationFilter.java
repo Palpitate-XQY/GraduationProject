@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import xxqqyyy.community.security.model.LoginPrincipal;
 import xxqqyyy.community.security.service.JwtTokenService;
@@ -30,6 +31,8 @@ import xxqqyyy.community.security.service.TokenBlacklistService;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String ACCESS_TOKEN_QUERY_KEY = "access_token";
+
     private final JwtTokenService jwtTokenService;
     private final TokenBlacklistService tokenBlacklistService;
     private final SecurityPrincipalService securityPrincipalService;
@@ -38,12 +41,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        String token = null;
+        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
+            token = authorization.substring(7);
+        } else if (isFilePreviewRequest(request)) {
+            token = request.getParameter(ACCESS_TOKEN_QUERY_KEY);
+        }
+        if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorization.substring(7);
         try {
             Jws<Claims> claimsJws = jwtTokenService.parse(token);
             Claims claims = claimsJws.getPayload();
@@ -67,5 +75,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-}
 
+    private boolean isFilePreviewRequest(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        return StringUtils.hasText(requestUri)
+            && requestUri.startsWith("/api/files/")
+            && requestUri.endsWith("/preview");
+    }
+}

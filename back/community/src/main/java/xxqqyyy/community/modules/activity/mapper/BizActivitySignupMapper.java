@@ -28,5 +28,9 @@ public interface BizActivitySignupMapper {
     long countSignedByActivity(@Param("activityId") Long activityId);
 
     List<BizActivitySignup> selectSignedListByActivity(@Param("activityId") Long activityId);
-}
 
+    List<BizActivitySignup> selectByUserAndActivityIds(
+        @Param("userId") Long userId,
+        @Param("activityIds") List<Long> activityIds
+    );
+}

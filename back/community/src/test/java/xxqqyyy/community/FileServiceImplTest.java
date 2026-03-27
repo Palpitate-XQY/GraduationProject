@@ -22,11 +22,17 @@ import xxqqyyy.community.infrastructure.storage.FileStorageProvider;
 import xxqqyyy.community.infrastructure.storage.FileStorageRouter;
 import xxqqyyy.community.infrastructure.storage.model.StorageConfigSnapshot;
 import xxqqyyy.community.infrastructure.storage.model.StoredFileResult;
+import xxqqyyy.community.modules.activity.mapper.BizActivityMapper;
+import xxqqyyy.community.modules.activity.mapper.BizActivityScopeMapper;
 import xxqqyyy.community.modules.file.entity.BizFileInfo;
 import xxqqyyy.community.modules.file.enums.FileStorageTypeEnum;
 import xxqqyyy.community.modules.file.mapper.BizFileInfoMapper;
 import xxqqyyy.community.modules.file.service.impl.FileServiceImpl;
 import xxqqyyy.community.modules.file.vo.FileInfoVO;
+import xxqqyyy.community.modules.notice.mapper.BizNoticeMapper;
+import xxqqyyy.community.modules.notice.mapper.BizNoticeScopeMapper;
+import xxqqyyy.community.modules.org.mapper.SysOrgMapper;
+import xxqqyyy.community.modules.system.service.DataScopeService;
 import xxqqyyy.community.modules.system.service.StorageConfigService;
 import xxqqyyy.community.security.model.LoginPrincipal;
 
@@ -43,6 +49,12 @@ class FileServiceImplTest {
     private FileStorageRouter fileStorageRouter;
     private FileStorageProvider fileStorageProvider;
     private FileStorageProperties fileStorageProperties;
+    private BizNoticeMapper bizNoticeMapper;
+    private BizNoticeScopeMapper bizNoticeScopeMapper;
+    private BizActivityMapper bizActivityMapper;
+    private BizActivityScopeMapper bizActivityScopeMapper;
+    private SysOrgMapper sysOrgMapper;
+    private DataScopeService dataScopeService;
     private FileServiceImpl fileService;
 
     @BeforeEach
@@ -54,11 +66,23 @@ class FileServiceImplTest {
         fileStorageProperties = new FileStorageProperties();
         fileStorageProperties.setDefaultType("LOCAL");
         fileStorageProperties.setMaxFileSizeBytes(20 * 1024 * 1024);
+        bizNoticeMapper = mock(BizNoticeMapper.class);
+        bizNoticeScopeMapper = mock(BizNoticeScopeMapper.class);
+        bizActivityMapper = mock(BizActivityMapper.class);
+        bizActivityScopeMapper = mock(BizActivityScopeMapper.class);
+        sysOrgMapper = mock(SysOrgMapper.class);
+        dataScopeService = mock(DataScopeService.class);
         fileService = new FileServiceImpl(
             bizFileInfoMapper,
             storageConfigService,
             fileStorageRouter,
-            fileStorageProperties
+            fileStorageProperties,
+            bizNoticeMapper,
+            bizNoticeScopeMapper,
+            bizActivityMapper,
+            bizActivityScopeMapper,
+            sysOrgMapper,
+            dataScopeService
         );
     }
 
@@ -112,4 +136,3 @@ class FileServiceImplTest {
         );
     }
 }
-

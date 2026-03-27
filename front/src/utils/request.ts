@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Axios 请求封装
  * - 统一 baseURL
  * - 自动注入 JWT token
@@ -18,11 +18,6 @@ function redirectToLogin() {
   if (window.location.pathname === '/login') return
   const redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`)
   window.location.href = `/login?redirect=${redirect}`
-}
-
-function redirectToForbidden() {
-  if (window.location.pathname === '/403') return
-  window.location.href = '/403'
 }
 
 const service: AxiosInstance = axios.create({
@@ -56,7 +51,6 @@ service.interceptors.response.use(
 
     if (FORBIDDEN_CODES.has(res.code)) {
       ElMessage.error(res.message || '无权限访问')
-      redirectToForbidden()
       return Promise.reject(new Error(res.message || '无权限访问')) as any
     }
 
@@ -72,7 +66,7 @@ service.interceptors.response.use(
     if (error.response?.status === 401) {
       redirectToLogin()
     } else if (error.response?.status === 403) {
-      redirectToForbidden()
+      ElMessage.error('无权限访问')
     } else {
       ElMessage.error(error.message || '网络异常')
     }

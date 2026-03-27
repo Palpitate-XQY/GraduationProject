@@ -58,5 +58,20 @@ public class ActivityVO {
 
     private LocalDateTime createTime;
 
+    /**
+     * 当前登录用户是否已报名。
+     */
+    private Boolean signedByMe;
+
+    /**
+     * 当前登录用户报名状态：SIGNED / CANCELED。
+     */
+    private String signupStatus;
+
+    /**
+     * 当前登录用户最近一次报名时间。
+     */
+    private LocalDateTime mySignupTime;
+
     private Set<ActivityScopeItem> scopeItems;
 }

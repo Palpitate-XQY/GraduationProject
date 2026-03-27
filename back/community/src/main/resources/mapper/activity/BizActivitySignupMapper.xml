@@ -66,5 +66,19 @@
         ORDER BY signup_time DESC
     </select>
 
-</mapper>
+    <select id="selectByUserAndActivityIds" resultMap="SignupMap">
+        SELECT id, activity_id, user_id, signup_status, signup_time, cancel_time,
+               create_by, create_time, update_by, update_time, deleted, version
+        FROM biz_activity_signup
+        WHERE user_id = #{userId}
+          AND deleted = 0
+          <if test="activityIds != null and activityIds.size() > 0">
+              AND activity_id IN
+              <foreach collection="activityIds" item="activityId" open="(" separator="," close=")">
+                  #{activityId}
+              </foreach>
+          </if>
+        ORDER BY signup_time DESC
+    </select>
 
+</mapper>

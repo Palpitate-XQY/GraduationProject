@@ -1,5 +1,5 @@
-/**
- * 权限与菜单过滤工具
+﻿/**
+ * Permission and menu helpers.
  */
 import type { AdminMenuGroup } from '@/types/menu'
 
@@ -25,7 +25,7 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
       { key: 'notice', label: '公告管理', route: '/dashboard/notice', permissionCodes: ['notice:list'] },
       { key: 'activity', label: '活动管理', route: '/dashboard/activity', permissionCodes: ['activity:list'] },
       { key: 'repair', label: '报修工单', route: '/dashboard/repair', permissionCodes: ['repair:manage:list'] },
-      { key: 'resident', label: '居民档案', route: '/dashboard/resident', permissionCodes: ['resident:profile:view'] },
+      { key: 'resident', label: '居民档案', route: '/dashboard/resident/profiles', permissionCodes: ['resident:profile:view'] },
     ],
   },
   {
@@ -34,7 +34,18 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
     items: [
       { key: 'sys-users', label: '用户管理', route: '/dashboard/system/users', permissionCodes: ['sys:user:list'] },
       { key: 'sys-roles', label: '角色管理', route: '/dashboard/system/roles', permissionCodes: ['sys:role:list'] },
-      { key: 'sys-permissions', label: '权限管理', route: '/dashboard/system/permissions', permissionCodes: ['sys:permission:list'] },
+      {
+        key: 'sys-permissions',
+        label: '权限管理',
+        route: '/dashboard/system/permissions',
+        permissionCodes: ['sys:permission:list'],
+      },
+      {
+        key: 'sys-dict',
+        label: '字典管理',
+        route: '/dashboard/system/dicts',
+        permissionCodes: ['sys:dict:type:list', 'sys:dict:data:list'],
+      },
     ],
   },
   {

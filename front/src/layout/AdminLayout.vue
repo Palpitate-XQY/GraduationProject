@@ -1,11 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
- * AdminLayout - 管理端骨架布局
- * 菜单按权限动态过滤，支持看板入口与 403 兜底联动。
+ * Admin layout with permission-driven menus.
  */
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { isNavigationFailure, useRoute, useRouter } from 'vue-router'
 import { LayoutDashboard, LogOut, ShieldCheck } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
@@ -22,14 +21,19 @@ const { pagePackCode, defaultHomeRoute } = storeToRefs(appStore)
 const menuGroups = computed(() => resolveAdminMenus(permissionCodes.value))
 const flattenedMenus = computed(() => menuGroups.value.flatMap((group) => group.items))
 const pageTitle = computed(() => (route.meta.title as string) || '管理后台')
-
 function isActive(path: string) {
   return route.path === path || route.path.startsWith(`${path}/`)
 }
 
-function navigate(path: string) {
-  if (route.path === path) return
-  router.push(path)
+async function navigate(path: string) {
+  if (!path || route.fullPath === path || route.path === path) return
+  try {
+    await router.push(path)
+  } catch (error) {
+    if (!isNavigationFailure(error)) {
+      console.error('Admin navigation error:', error)
+    }
+  }
 }
 
 async function handleLogout() {
@@ -40,7 +44,7 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-white">
+  <div class="min-h-screen text-white">
     <aside class="hidden lg:flex fixed inset-y-0 left-0 w-72 border-r border-white/8 bg-slate-950/80 backdrop-blur-xl">
       <div class="w-full p-5">
         <button
@@ -90,7 +94,7 @@ async function handleLogout() {
         <div class="flex items-center justify-between gap-4">
           <div>
             <h1 class="text-xl md:text-2xl font-heading italic tracking-tight">{{ pageTitle }}</h1>
-            <p class="text-xs md:text-sm text-white/55 font-body mt-1">权限驱动菜单与路由，按角色看板落地默认首页</p>
+            <p class="text-xs md:text-sm text-white/55 font-body mt-1">权限驱动菜单与路由，按角色看板落位默认首页</p>
           </div>
           <button
             type="button"

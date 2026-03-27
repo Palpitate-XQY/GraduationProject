@@ -20,10 +20,7 @@ import xxqqyyy.community.modules.file.vo.FileInfoVO;
 import xxqqyyy.community.modules.log.annotation.OperationLog;
 
 /**
- * 文件上传与下载控制器。
- *
- * @author codex
- * @since 1.0.0
+ * File upload and access controller.
  */
 @Tag(name = "文件管理")
 @RestController
@@ -35,7 +32,15 @@ public class FileController {
 
     @Operation(summary = "上传文件")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('file:upload')")
+    @PreAuthorize(
+        "hasAnyAuthority(" +
+            "'file:upload'," +
+            "'repair:create'," +
+            "'repair:process'," +
+            "'repair:submit'," +
+            "'repair:reopen'" +
+        ")"
+    )
     @OperationLog(module = "文件", type = "上传")
     public ApiResponse<FileInfoVO> upload(
         @Parameter(description = "待上传文件", required = true)
@@ -61,5 +66,11 @@ public class FileController {
     public void download(@PathVariable("id") Long id, HttpServletResponse response) {
         fileService.download(id, response);
     }
-}
 
+    @Operation(summary = "预览文件（用于公告/活动附件与图片）")
+    @GetMapping("/{id}/preview")
+    @PreAuthorize("isAuthenticated()")
+    public void preview(@PathVariable("id") Long id, HttpServletResponse response) {
+        fileService.preview(id, response);
+    }
+}

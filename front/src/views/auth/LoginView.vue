@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
  * LoginView - 登录页
+ * 背景视频由 App.vue 全局提供。
  */
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -37,11 +38,21 @@ async function handleLogin() {
 
     const redirect = (route.query.redirect as string) || ''
     if (redirect) {
-      router.push(redirect)
+      let redirectPath = redirect
+      try {
+        redirectPath = decodeURIComponent(redirect)
+      } catch {
+        redirectPath = redirect
+      }
+      if (redirectPath.startsWith('/')) {
+        router.push(redirectPath)
+      } else {
+        router.push('/')
+      }
       return
     }
 
-    if (userStore.hasPermission('dashboard:view')) {
+    if (userStore.canAccessDashboard) {
       await appStore.fetchDashboardOverview(true)
       router.push(appStore.defaultHomeRoute)
     } else {
@@ -57,18 +68,7 @@ async function handleLogin() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center relative overflow-hidden">
-    <video
-      class="absolute inset-0 w-full h-full object-cover z-0"
-      autoplay
-      loop
-      muted
-      playsinline
-      preload="auto"
-      poster="/images/smart_community_bg.jpeg"
-    >
-      <source src="https://cdn.pixabay.com/video/2020/05/24/40090-424838562_large.mp4" type="video/mp4" />
-    </video>
-    <div class="absolute inset-0 bg-black/50 z-0" />
+    <div class="absolute inset-0 bg-black/55 z-0" />
 
     <div class="relative z-10 w-full max-w-md mx-4">
       <div class="liquid-glass-strong rounded-3xl p-8 md:p-10">

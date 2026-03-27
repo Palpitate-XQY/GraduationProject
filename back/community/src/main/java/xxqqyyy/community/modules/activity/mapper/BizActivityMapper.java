@@ -60,6 +60,18 @@ public interface BizActivityMapper {
         @Param("size") long size
     );
 
+    long countMyPage(
+        @Param("query") ActivityPageQuery query,
+        @Param("userId") Long userId
+    );
+
+    List<BizActivity> selectMyPage(
+        @Param("query") ActivityPageQuery query,
+        @Param("userId") Long userId,
+        @Param("offset") long offset,
+        @Param("size") long size
+    );
+
     long countPublished(
         @Param("allAccess") boolean allAccess,
         @Param("orgIds") Collection<Long> orgIds

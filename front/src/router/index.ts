@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vue Router 配置
  * - 门户端 + 管理端骨架
  * - 路由/菜单/按钮三层权限联动
@@ -17,7 +17,7 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'Home',
         component: () => import('@/views/home/HomeView.vue'),
-        meta: { title: '首页 · 智慧社区' },
+        meta: { title: '首页 · 智慧社区', requiresAuth: true },
       },
       {
         path: 'notices',
@@ -108,6 +108,7 @@ const routes: RouteRecordRaw[] = [
         path: 'maintainer',
         name: 'DashboardMaintainer',
         component: () => import('@/views/admin/DashboardView.vue'),
+        alias: 'resident',
         meta: { title: '维修员看板', requiresAuth: true, permissions: ['dashboard:view'] },
       },
       {
@@ -119,7 +120,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'notice',
         name: 'AdminNotice',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminNoticeView.vue'),
         meta: {
           title: '公告管理',
           description: '对接 /api/notices 列表、发布、撤回等能力。',
@@ -130,7 +131,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'activity',
         name: 'AdminActivity',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminActivityView.vue'),
         meta: {
           title: '活动管理',
           description: '对接 /api/activities 管理页、报名统计与状态流转。',
@@ -141,7 +142,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'repair',
         name: 'AdminRepair',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminRepairView.vue'),
         meta: {
           title: '报修工单',
           description: '对接 /api/repairs/manage 与受理、转派、处理动作链。',
@@ -150,9 +151,9 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'resident',
+        path: 'resident/profiles',
         name: 'AdminResident',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminResidentView.vue'),
         meta: {
           title: '居民档案',
           description: '对接 /api/resident/profiles 管理能力。',
@@ -163,7 +164,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'system/users',
         name: 'AdminSystemUsers',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminUsersView.vue'),
         meta: {
           title: '用户管理',
           description: '对接 /api/system/users 与角色分配。',
@@ -174,7 +175,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'system/roles',
         name: 'AdminSystemRoles',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminRolesView.vue'),
         meta: {
           title: '角色管理',
           description: '对接 /api/system/roles 与 role_scope 策略。',
@@ -185,7 +186,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'system/permissions',
         name: 'AdminSystemPermissions',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminPermissionsView.vue'),
         meta: {
           title: '权限管理',
           description: '对接 /api/system/permissions 权限点维护。',
@@ -194,9 +195,20 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'system/dicts',
+        name: 'AdminSystemDicts',
+        component: () => import('@/views/admin/AdminDictView.vue'),
+        meta: {
+          title: '字典管理',
+          description: '对接 /api/system/dicts 类型与数据维护。',
+          requiresAuth: true,
+          permissions: ['sys:dict:type:list', 'sys:dict:data:list'],
+        },
+      },
+      {
         path: 'org/tree',
         name: 'AdminOrgTree',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminOrgTreeView.vue'),
         meta: {
           title: '组织架构',
           description: '对接 /api/org/tree 与组织节点增删改。',
@@ -207,7 +219,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'org/complex-property',
         name: 'AdminOrgComplexProperty',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminComplexPropertyRelView.vue'),
         meta: {
           title: '小区物业关联',
           description: '对接 /api/org/complex-property-rel 维护小区与物业关系。',
@@ -218,7 +230,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'log/login',
         name: 'AdminLogLogin',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminLoginLogsView.vue'),
         meta: {
           title: '登录日志',
           description: '对接 /api/logs/logins 审计登录行为。',
@@ -229,7 +241,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'log/operation',
         name: 'AdminLogOperation',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminOperationLogsView.vue'),
         meta: {
           title: '操作日志',
           description: '对接 /api/logs/operations 审计系统操作。',
@@ -240,7 +252,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'system/storage',
         name: 'AdminSystemStorage',
-        component: () => import('@/views/admin/AdminSkeletonView.vue'),
+        component: () => import('@/views/admin/AdminStorageView.vue'),
         meta: {
           title: '存储配置',
           description: '对接 /api/system/storage-config，维护 LOCAL/QINIU 参数。',
@@ -275,7 +287,11 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior: (to, from, savedPosition) => {
+    if (savedPosition) return savedPosition
+    if (to.path.startsWith('/dashboard')) return false
+    return { top: 0, left: 0 }
+  },
 })
 
 router.beforeEach(async (to) => {
@@ -304,7 +320,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.path === '/login' && userStore.isLoggedIn) {
-    if (userStore.hasPermission('dashboard:view')) {
+    if (userStore.canAccessDashboard) {
       try {
         await appStore.fetchDashboardOverview()
         return appStore.defaultHomeRoute
@@ -320,7 +336,11 @@ router.beforeEach(async (to) => {
     return { path: '/403', query: { from: to.fullPath } }
   }
 
-  if (to.path.startsWith('/dashboard') && userStore.hasPermission('dashboard:view')) {
+  if (to.path.startsWith('/dashboard') && !userStore.canAccessDashboard) {
+    return '/'
+  }
+
+  if (to.path.startsWith('/dashboard') && userStore.canAccessDashboard) {
     try {
       await appStore.fetchDashboardOverview()
     } catch {
@@ -336,3 +356,4 @@ router.beforeEach(async (to) => {
 })
 
 export default router
+

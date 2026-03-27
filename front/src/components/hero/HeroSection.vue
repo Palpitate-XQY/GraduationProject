@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * HeroSection - Cinematic 首屏
+ * HeroSection - Cinematic hero content layer.
+ * 背景视频由 App.vue 全局提供。
  */
 import { onMounted, ref } from 'vue'
 import { gsap } from 'gsap'
@@ -25,18 +26,6 @@ onMounted(() => {
 
 <template>
   <section id="features" class="relative min-h-screen flex flex-col overflow-hidden">
-    <video
-      class="absolute inset-0 w-full h-full object-cover z-0"
-      :poster="heroContent.posterUrl"
-      autoplay
-      loop
-      muted
-      playsinline
-      preload="auto"
-    >
-      <source :src="heroContent.videoUrl" type="video/mp4" />
-    </video>
-
     <div class="absolute inset-0 bg-black/40 z-0" />
 
     <div class="relative z-10 flex flex-col flex-1 px-6 md:px-8 lg:px-16 pt-32 md:pt-40">

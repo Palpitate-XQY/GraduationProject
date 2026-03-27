@@ -5,25 +5,26 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user'
+import { HERO_MUX_IFRAME_SRC } from '@/constants/background'
 import type { CtaButton, HeroContent, NavItem, QuickEntry } from '@/types/hero'
 
 const BASE_NAV_ITEMS: NavItem[] = [
-  { label: '首页', href: '/' },
-  { label: '社区公告', href: '/notices', permissionCode: 'notice:resident:list', publicFallback: true },
-  { label: '社区活动', href: '/activities', permissionCode: 'activity:resident:list', publicFallback: true },
-  { label: '在线报修', href: '/repair', permissionCode: 'repair:my:list', requiresAuth: true },
-  { label: '居民服务', href: '/profile', permissionCode: 'resident:profile:my:view', requiresAuth: true },
+  { label: '首页看板', href: '/', requiresAuth: true },
+  { label: '公告中心', href: '/notices', permissionCode: 'notice:resident:list', requiresAuth: true },
+  { label: '活动大厅', href: '/activities', permissionCode: 'activity:resident:list', requiresAuth: true },
+  { label: '报修服务', href: '/repair', permissionCode: 'repair:my:list', requiresAuth: true },
+  { label: '个人中心', href: '/profile', permissionCode: 'resident:profile:my:view', requiresAuth: true },
   { label: '数据看板', href: '/dashboard', permissionCode: 'dashboard:view', requiresAuth: true },
 ]
 
-const BASE_QUICK_ENTRIES: Array<QuickEntry & Pick<NavItem, 'permissionCode' | 'requiresAuth' | 'publicFallback'>> = [
+const BASE_QUICK_ENTRIES: Array<QuickEntry & Pick<NavItem, 'permissionCode' | 'requiresAuth'>> = [
   {
     label: '社区公告',
     icon: 'Megaphone',
     href: '/notices',
     description: '查看社区通知与公开信息',
     permissionCode: 'notice:resident:list',
-    publicFallback: true,
+    requiresAuth: true,
   },
   {
     label: '社区活动',
@@ -31,7 +32,7 @@ const BASE_QUICK_ENTRIES: Array<QuickEntry & Pick<NavItem, 'permissionCode' | 'r
     href: '/activities',
     description: '报名参与社区活动',
     permissionCode: 'activity:resident:list',
-    publicFallback: true,
+    requiresAuth: true,
   },
   {
     label: '在线报修',
@@ -51,25 +52,31 @@ const BASE_QUICK_ENTRIES: Array<QuickEntry & Pick<NavItem, 'permissionCode' | 'r
   },
 ]
 
-function checkVisibility(item: Pick<NavItem, 'permissionCode' | 'requiresAuth' | 'publicFallback'>, isLoggedIn: boolean, permissionCodes: string[]) {
+function checkVisibility(
+  item: Pick<NavItem, 'permissionCode' | 'requiresAuth'>,
+  isLoggedIn: boolean,
+  permissionCodes: string[],
+) {
   if (item.requiresAuth && !isLoggedIn) {
     return false
   }
   if (!item.permissionCode) {
     return true
   }
-  if (!isLoggedIn) {
-    return Boolean(item.publicFallback)
-  }
   return permissionCodes.includes(item.permissionCode)
 }
 
 export function useHeroContent() {
   const userStore = useUserStore()
-  const { isLoggedIn, permissionCodes } = storeToRefs(userStore)
+  const { isLoggedIn, permissionCodes, canAccessDashboard } = storeToRefs(userStore)
 
   const navItems = computed(() =>
-    BASE_NAV_ITEMS.filter((item) => checkVisibility(item, isLoggedIn.value, permissionCodes.value)),
+    BASE_NAV_ITEMS.filter((item) => {
+      if (item.href === '/dashboard' && !canAccessDashboard.value) {
+        return false
+      }
+      return checkVisibility(item, isLoggedIn.value, permissionCodes.value)
+    }),
   )
 
   const ctas = computed<CtaButton[]>(() => {
@@ -110,7 +117,7 @@ export function useHeroContent() {
       { name: '数据看板洞察' },
     ],
     partnerSlogan: '连接社区治理、物业服务与居民生活的数字化能力底座',
-    videoUrl: 'https://cdn.pixabay.com/video/2020/05/24/40090-424838562_large.mp4',
+    iframeSrc: HERO_MUX_IFRAME_SRC,
     posterUrl: '/images/smart_community_bg.jpeg',
   }))
 

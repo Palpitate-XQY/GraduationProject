@@ -28,10 +28,12 @@ public class CurrentUserVO {
     @Schema(description = "组织ID")
     private Long orgId;
 
+    @Schema(description = "Community org name")
+    private String communityOrgName;
+
     @Schema(description = "角色编码集合")
     private Set<String> roleCodes;
 
     @Schema(description = "权限编码集合")
     private Set<String> permissionCodes;
 }
-

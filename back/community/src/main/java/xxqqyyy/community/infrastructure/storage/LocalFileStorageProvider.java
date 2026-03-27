@@ -52,7 +52,7 @@ public class LocalFileStorageProvider implements FileStorageProvider {
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        return baseUrl + "/" + fileId + "/download";
+        return baseUrl + "/" + fileId + "/preview";
     }
 
     @Override
@@ -91,4 +91,3 @@ public class LocalFileStorageProvider implements FileStorageProvider {
         return rootPath;
     }
 }
-

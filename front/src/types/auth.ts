@@ -23,6 +23,7 @@ export interface CurrentUserVO {
   username: string
   nickname: string
   orgId: number
+  communityOrgName?: string | null
   roleCodes: string[]
   permissionCodes: string[]
 }

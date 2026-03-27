@@ -6,45 +6,32 @@ import xxqqyyy.community.modules.file.entity.BizFileInfo;
 import xxqqyyy.community.modules.file.vo.FileInfoVO;
 
 /**
- * 文件服务接口。
- *
- * @author codex
- * @since 1.0.0
+ * File service interface.
  */
 public interface FileService {
 
     /**
-     * 上传文件。
-     *
-     * @param file 文件
-     * @param bizType 业务类型
-     * @param bizId 业务ID
-     * @return 文件信息
+     * Upload file.
      */
     FileInfoVO upload(MultipartFile file, String bizType, Long bizId);
 
     /**
-     * 查询文件详情。
-     *
-     * @param fileId 文件ID
-     * @return 文件信息
+     * Query file detail.
      */
     FileInfoVO getById(Long fileId);
 
     /**
-     * 下载文件，按存储方式自动处理（本地直出/七牛跳转）。
-     *
-     * @param fileId 文件ID
-     * @param response 响应对象
+     * Download file as attachment.
      */
     void download(Long fileId, HttpServletResponse response);
 
     /**
-     * 查询文件实体。
-     *
-     * @param fileId 文件ID
-     * @return 文件实体
+     * Preview file for inline usage.
+     */
+    void preview(Long fileId, HttpServletResponse response);
+
+    /**
+     * Query file entity.
      */
     BizFileInfo requireById(Long fileId);
 }
-

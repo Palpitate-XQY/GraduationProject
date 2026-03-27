@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /**
- * HomeView — 首屏页面
+ * HomeView - 居民门户首页看板
  */
-import HeroSection from '@/components/hero/HeroSection.vue'
+import HomeBoardSection from '@/components/home/HomeBoardSection.vue'
 </script>
 
 <template>
-  <HeroSection />
+  <HomeBoardSection />
 </template>

@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import { Search, Pin, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { residentNoticePage } from '@/api/notice'
 import type { NoticeVO } from '@/types/notice'
+import { buildFilePreviewUrl, withFileAccessToken } from '@/utils/file-url'
 
 const router = useRouter()
 
@@ -47,8 +48,19 @@ function formatDate(d: string | null) {
 }
 
 function noticeTypeLabel(type: string) {
-  const map: Record<string, string> = { NOTICE: '通知', ANNOUNCEMENT: '公告', NEWS: '新闻' }
+  const map: Record<string, string> = {
+    STREET_COMMUNITY: '街道/社区公告',
+    PROPERTY: '物业公告',
+  }
   return map[type] || type
+}
+
+function resolveNoticeCover(item: NoticeVO) {
+  if (item.coverFileId) {
+    return buildFilePreviewUrl(item.coverFileId)
+  }
+  const attachment = item.attachments?.find((entry) => entry.contentType?.startsWith('image/'))
+  return withFileAccessToken(attachment?.accessUrl)
 }
 
 onMounted(fetchData)
@@ -104,8 +116,15 @@ onMounted(fetchData)
                  hover:bg-white/5 transition-all duration-300 group"
           @click="router.push(`/notices/${item.id}`)"
         >
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
+          <div class="flex items-start gap-4">
+            <img
+              v-if="resolveNoticeCover(item)"
+              :src="resolveNoticeCover(item)"
+              :alt="item.title"
+              class="h-20 w-32 shrink-0 rounded-xl border border-white/10 object-cover"
+            >
+
+            <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 mb-2">
                 <Pin v-if="item.topFlag === 1" :size="14" class="text-amber-400 shrink-0" />
                 <span
@@ -120,7 +139,8 @@ onMounted(fetchData)
                 {{ item.title }}
               </h3>
             </div>
-            <span class="text-white/30 text-xs font-body shrink-0 mt-1">
+
+            <span class="mt-1 shrink-0 text-xs font-body text-white/30">
               {{ formatDate(item.publishTime || item.createTime) }}
             </span>
           </div>

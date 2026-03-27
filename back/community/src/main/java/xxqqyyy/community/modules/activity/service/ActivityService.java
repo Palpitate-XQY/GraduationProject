@@ -33,6 +33,8 @@ public interface ActivityService {
 
     PageResult<ActivityVO> residentPage(ActivityPageQuery query);
 
+    PageResult<ActivityVO> myPage(ActivityPageQuery query);
+
     ActivityVO residentDetail(Long activityId);
 
     void signup(Long activityId);
@@ -43,4 +45,3 @@ public interface ActivityService {
 
     ActivityStatsVO stats(Long activityId);
 }
-

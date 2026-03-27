@@ -181,6 +181,48 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <select id="countMyPage" resultType="long">
+        SELECT COUNT(1)
+        FROM biz_activity a
+                 INNER JOIN (
+                     SELECT activity_id, MAX(signup_time) AS latest_signup_time
+                     FROM biz_activity_signup
+                     WHERE deleted = 0
+                       AND user_id = #{userId}
+                       AND signup_status = 'SIGNED'
+                     GROUP BY activity_id
+                 ) s ON a.id = s.activity_id
+        WHERE a.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND a.status = #{query.status}
+          </if>
+    </select>
+
+    <select id="selectMyPage" resultMap="ActivityMap">
+        SELECT <include refid="base_columns_with_alias"/>
+        FROM biz_activity a
+                 INNER JOIN (
+                     SELECT activity_id, MAX(signup_time) AS latest_signup_time
+                     FROM biz_activity_signup
+                     WHERE deleted = 0
+                       AND user_id = #{userId}
+                       AND signup_status = 'SIGNED'
+                     GROUP BY activity_id
+                 ) s ON a.id = s.activity_id
+        WHERE a.deleted = 0
+          <if test="query.keyword != null and query.keyword != ''">
+              AND a.title LIKE CONCAT('%', #{query.keyword}, '%')
+          </if>
+          <if test="query.status != null and query.status != ''">
+              AND a.status = #{query.status}
+          </if>
+        ORDER BY s.latest_signup_time DESC, a.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="countPublished" resultType="long">
         SELECT COUNT(1)
         FROM biz_activity a

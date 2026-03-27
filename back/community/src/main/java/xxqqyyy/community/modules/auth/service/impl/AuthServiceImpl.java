@@ -90,11 +90,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public CurrentUserVO me() {
         LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
+        String communityOrgName = resolveCommunityOrgName(principal.getOrgId());
         return CurrentUserVO.builder()
             .userId(principal.getUserId())
             .username(principal.getUsername())
             .nickname(principal.getNickname())
             .orgId(principal.getOrgId())
+            .communityOrgName(communityOrgName)
             .roleCodes(principal.getRoleCodes())
             .permissionCodes(principal.getPermissionCodes())
             .build();
@@ -188,6 +190,26 @@ public class AuthServiceImpl implements AuthService {
         String newPassword = passwordEncoder.encode(request.getNewPassword());
         sysUserMapper.updatePassword(user.getId(), newPassword, 0, user.getId());
         stringRedisTemplate.delete(key);
+    }
+
+    private String resolveCommunityOrgName(Long orgId) {
+        if (orgId == null) {
+            return null;
+        }
+        SysOrg org = sysOrgMapper.selectById(orgId);
+        if (org == null) {
+            return null;
+        }
+        if (OrgTypeEnum.COMMUNITY.getCode().equalsIgnoreCase(org.getOrgType())) {
+            return org.getOrgName();
+        }
+        if (OrgTypeEnum.COMPLEX.getCode().equalsIgnoreCase(org.getOrgType()) && org.getParentId() != null) {
+            SysOrg communityOrg = sysOrgMapper.selectById(org.getParentId());
+            if (communityOrg != null && OrgTypeEnum.COMMUNITY.getCode().equalsIgnoreCase(communityOrg.getOrgType())) {
+                return communityOrg.getOrgName();
+            }
+        }
+        return null;
     }
 
     private SysRole requireResidentRole() {

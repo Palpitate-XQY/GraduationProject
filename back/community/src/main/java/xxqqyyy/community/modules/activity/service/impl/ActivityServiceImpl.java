@@ -2,8 +2,11 @@ package xxqqyyy.community.modules.activity.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -70,7 +73,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         long offset = (query.getCurrent() - 1) * query.getSize();
         List<ActivityVO> records = bizActivityMapper.selectManagePage(query, scope.isAllAccess(), scope.getSafeOrgIds(), offset, query.getSize())
-            .stream().map(this::toActivityVO).toList();
+            .stream().map(activity -> toActivityVO(activity, null)).toList();
         return PageResult.<ActivityVO>builder()
             .records(records)
             .total(total)
@@ -83,7 +86,7 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityVO detail(Long activityId) {
         BizActivity activity = requireActivity(activityId);
         assertManageVisible(activity);
-        return toActivityVO(activity);
+        return toActivityVO(activity, null);
     }
 
     @Override
@@ -196,8 +199,32 @@ public class ActivityServiceImpl implements ActivityService {
             return PageResult.empty(query.getCurrent(), query.getSize());
         }
         long offset = (query.getCurrent() - 1) * query.getSize();
-        List<ActivityVO> records = bizActivityMapper.selectResidentPage(query, org.getId(), org.getAncestorPath(), offset, query.getSize())
-            .stream().map(this::toActivityVO).toList();
+        List<BizActivity> activities = bizActivityMapper.selectResidentPage(query, org.getId(), org.getAncestorPath(), offset, query.getSize());
+        Map<Long, BizActivitySignup> signupMap = querySignupStateMap(principal.getUserId(), activities);
+        List<ActivityVO> records = activities.stream()
+            .map(activity -> toActivityVO(activity, signupMap.get(activity.getId())))
+            .toList();
+        return PageResult.<ActivityVO>builder()
+            .records(records)
+            .total(total)
+            .current(query.getCurrent())
+            .size(query.getSize())
+            .build();
+    }
+
+    @Override
+    public PageResult<ActivityVO> myPage(ActivityPageQuery query) {
+        LoginPrincipal principal = SecurityContextHelper.getCurrentPrincipal();
+        long total = bizActivityMapper.countMyPage(query, principal.getUserId());
+        if (total == 0) {
+            return PageResult.empty(query.getCurrent(), query.getSize());
+        }
+        long offset = (query.getCurrent() - 1) * query.getSize();
+        List<BizActivity> activities = bizActivityMapper.selectMyPage(query, principal.getUserId(), offset, query.getSize());
+        Map<Long, BizActivitySignup> signupMap = querySignupStateMap(principal.getUserId(), activities);
+        List<ActivityVO> records = activities.stream()
+            .map(activity -> toActivityVO(activity, signupMap.get(activity.getId())))
+            .toList();
         return PageResult.<ActivityVO>builder()
             .records(records)
             .total(total)
@@ -217,7 +244,8 @@ public class ActivityServiceImpl implements ActivityService {
         if (!isVisibleToOrg(activityId, org.getId(), org.getAncestorPath())) {
             throw new BizException(ErrorCode.FORBIDDEN, "无权查看活动");
         }
-        return toActivityVO(activity);
+        BizActivitySignup signup = bizActivitySignupMapper.selectByActivityAndUser(activityId, principal.getUserId());
+        return toActivityVO(activity, signup);
     }
 
     @Override
@@ -398,7 +426,27 @@ public class ActivityServiceImpl implements ActivityService {
         return false;
     }
 
-    private ActivityVO toActivityVO(BizActivity activity) {
+    private Map<Long, BizActivitySignup> querySignupStateMap(Long userId, List<BizActivity> activities) {
+        if (CollectionUtils.isEmpty(activities)) {
+            return Collections.emptyMap();
+        }
+        List<Long> activityIds = activities.stream().map(BizActivity::getId).toList();
+        if (CollectionUtils.isEmpty(activityIds)) {
+            return Collections.emptyMap();
+        }
+        List<BizActivitySignup> signups = bizActivitySignupMapper.selectByUserAndActivityIds(userId, activityIds);
+        if (CollectionUtils.isEmpty(signups)) {
+            return Collections.emptyMap();
+        }
+        Map<Long, BizActivitySignup> signupMap = new HashMap<>();
+        for (BizActivitySignup signup : signups) {
+            signupMap.putIfAbsent(signup.getActivityId(), signup);
+        }
+        return signupMap;
+    }
+
+    private ActivityVO toActivityVO(BizActivity activity, BizActivitySignup signup) {
+        boolean signedByMe = signup != null && ActivitySignupStatusEnum.SIGNED.getCode().equals(signup.getSignupStatus());
         Set<ActivityScopeItem> scopeItems = bizActivityScopeMapper.selectByActivityId(activity.getId()).stream().map(scope -> {
             ActivityScopeItem item = new ActivityScopeItem();
             item.setScopeType(scope.getScopeType());
@@ -423,6 +471,9 @@ public class ActivityServiceImpl implements ActivityService {
             .publisherOrgId(activity.getPublisherOrgId())
             .publishTime(activity.getPublishTime())
             .createTime(activity.getCreateTime())
+            .signedByMe(signedByMe)
+            .signupStatus(signup == null ? null : signup.getSignupStatus())
+            .mySignupTime(signup == null ? null : signup.getSignupTime())
             .scopeItems(scopeItems)
             .build();
     }

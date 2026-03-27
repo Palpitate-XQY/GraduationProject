@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import { Search, MapPin, Clock, Users, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { residentActivityPage } from '@/api/activity'
 import type { ActivityVO } from '@/types/activity'
+import { buildFilePreviewUrl, withFileAccessToken } from '@/utils/file-url'
 
 const router = useRouter()
 const loading = ref(false)
@@ -43,6 +44,28 @@ function statusLabel(s: string) {
 function statusColor(s: string) {
   const m: Record<string, string> = { DRAFT: 'bg-gray-500/20 text-gray-300', PUBLISHED: 'bg-emerald-500/20 text-emerald-300', RECALLED: 'bg-amber-500/20 text-amber-300', FINISHED: 'bg-white/10 text-white/50' }
   return m[s] || 'bg-white/10 text-white/60'
+}
+
+function displayStatusLabel(item: ActivityVO) {
+  if (item.signedByMe || item.signupStatus === 'SIGNED') {
+    return '已报名'
+  }
+  return statusLabel(item.status)
+}
+
+function displayStatusColor(item: ActivityVO) {
+  if (item.signedByMe || item.signupStatus === 'SIGNED') {
+    return 'bg-sky-500/20 text-sky-300'
+  }
+  return statusColor(item.status)
+}
+
+function resolveActivityCover(item: ActivityVO) {
+  if (item.coverFileId) {
+    return buildFilePreviewUrl(item.coverFileId)
+  }
+  const attachment = item.attachments?.find((entry) => entry.contentType?.startsWith('image/'))
+  return withFileAccessToken(attachment?.accessUrl) || '/images/smart_community_bg.jpeg'
 }
 
 onMounted(fetchData)
@@ -91,10 +114,18 @@ onMounted(fetchData)
                  hover:bg-white/5 transition-all duration-300 group"
           @click="router.push(`/activities/${item.id}`)"
         >
+          <div class="mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <img
+              :src="resolveActivityCover(item)"
+              :alt="item.title"
+              class="h-40 w-full object-cover transition duration-500 group-hover:scale-105"
+            >
+          </div>
+
           <!-- 状态 -->
           <div class="flex items-center justify-between mb-3">
-            <span :class="['inline-block px-2.5 py-0.5 rounded-full text-xs font-body', statusColor(item.status)]">
-              {{ statusLabel(item.status) }}
+            <span :class="['inline-block px-2.5 py-0.5 rounded-full text-xs font-body', displayStatusColor(item)]">
+              {{ displayStatusLabel(item) }}
             </span>
             <span class="text-white/30 text-xs font-body">{{ formatDate(item.createTime) }}</span>
           </div>

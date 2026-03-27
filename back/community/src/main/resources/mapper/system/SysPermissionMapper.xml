@@ -126,7 +126,9 @@
                   #{id}
               </foreach>
           </if>
+          <if test="ids == null or ids.size() == 0">
+              AND 1 = 2
+          </if>
     </select>
 
 </mapper>
-

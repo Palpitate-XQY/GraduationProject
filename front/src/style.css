@@ -174,3 +174,146 @@ body {
 .el-message-box {
   border-radius: 16px !important;
 }
+
+/* ===========================
+   Admin 视觉统一
+   =========================== */
+.admin-page-header {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: linear-gradient(135deg, rgba(8, 26, 48, 0.44), rgba(11, 34, 55, 0.26));
+}
+
+.admin-page .liquid-glass {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.admin-page .el-form--inline {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(7, 18, 32, 0.34);
+  padding: 12px 14px;
+}
+
+.admin-page .el-form--inline .el-form-item {
+  margin-bottom: 8px;
+  margin-right: 10px;
+}
+
+.admin-page .el-form--inline .el-input__wrapper,
+.admin-page .el-form--inline .el-select__wrapper,
+.admin-page .el-form--inline .el-textarea__inner,
+.admin-page .el-form--inline .el-input-number,
+.admin-page .el-form--inline .el-date-editor.el-input,
+.admin-page .el-form--inline .el-date-editor.el-input__wrapper {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
+}
+
+.admin-page .el-form--inline .el-input__inner,
+.admin-page .el-form--inline .el-select__placeholder,
+.admin-page .el-form--inline .el-textarea__inner {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.admin-page .el-form--inline .el-input__inner::placeholder,
+.admin-page .el-form--inline .el-textarea__inner::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.admin-page .el-form--inline .el-button {
+  border-radius: 9999px;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.admin-page .admin-table {
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.admin-page .admin-table.el-table {
+  background: rgba(6, 19, 34, 0.5);
+  --el-table-border-color: rgba(255, 255, 255, 0.1);
+  --el-table-tr-bg-color: rgba(0, 0, 0, 0);
+  --el-table-header-bg-color: rgba(7, 20, 36, 0.82);
+  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-page .admin-table .el-table__inner-wrapper::before {
+  display: none;
+}
+
+.admin-page .admin-table .el-table__header .el-table__cell {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+.admin-page .admin-table .el-table__cell {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-body);
+}
+
+.admin-page .admin-table .el-table__row:hover > td.el-table__cell {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.admin-page .admin-table .el-button + .el-button {
+  margin-left: 8px;
+}
+
+.admin-page .el-alert {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(128, 23, 23, 0.22);
+}
+
+.admin-page .admin-pager-wrap {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 8px;
+}
+
+.admin-page .el-pagination {
+  --el-pagination-bg-color: rgba(255, 255, 255, 0.08);
+  --el-pagination-hover-color: #ffffff;
+  --el-pagination-button-color: rgba(255, 255, 255, 0.84);
+  --el-pagination-text-color: rgba(255, 255, 255, 0.8);
+}
+
+.admin-page .el-pagination .btn-prev,
+.admin-page .el-pagination .btn-next,
+.admin-page .el-pagination .el-pager li,
+.admin-page .el-pagination .el-select .el-input__wrapper {
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.admin-page .el-pagination .el-pager li.is-active {
+  background: rgba(94, 196, 255, 0.25) !important;
+  border-color: rgba(130, 208, 255, 0.46) !important;
+  color: #fff !important;
+}
+
+.el-dialog,
+.el-drawer {
+  --el-bg-color: rgba(7, 19, 34, 0.94);
+  --el-text-color-primary: rgba(255, 255, 255, 0.92);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.16);
+  --el-fill-color-blank: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.el-dialog {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px !important;
+}
+
+.el-drawer {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
